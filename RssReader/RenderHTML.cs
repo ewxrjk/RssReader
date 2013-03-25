@@ -34,31 +34,10 @@ namespace RssReader
         //Console.WriteLine("<{0}>", e.Name);
         switch (e.Name) {
           case "ul":
+            ListContainer(e, t.Inlines, y => "•");
+            break;
           case "ol":
-            Grid g = new Grid();
-            g.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
-            g.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
-            int y = 0;
-            foreach (HTML.Element ee in e.Contents) {
-              //Console.WriteLine("<{0}>", ee.Name);
-              g.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
-              TextBlock bullet = new TextBlock()
-              {
-                Text = (e.Name == "ul" ? "•" : string.Format("{0}.", y + 1)),
-                Margin = new Thickness(1),
-              };
-              Grid.SetColumn(bullet, 0);
-              Grid.SetRow(bullet, y);
-              g.Children.Add(bullet);
-              TextBlock content = HTMLToTextBlock(ee);
-              Grid.SetColumn(content, 1);
-              Grid.SetRow(content, y);
-              g.Children.Add(content);
-              ++y;
-              //Console.WriteLine("</{0}>", ee.Name);
-            }
-            t.Inlines.Add(g);
-            t.Inlines.Add(new LineBreak());
+            ListContainer(e, t.Inlines, y => string.Format("{0}.", y + 1));
             break;
           case "h1":
           case "h2":
@@ -66,28 +45,13 @@ namespace RssReader
           case "h4":
           case "h5":
           case "h6":
-            double fontScale = Math.Pow(1.125, '7' - e.Name[1]);
-            Span s = new Span() { FontWeight = FontWeights.Bold };
-            foreach (HTML.Node node in e.Contents) {
-              s.Inlines.Add(ConvertToInline(node, fontScale, null));
-            }
-            t.Inlines.Add(s);
-            if (i + 1 != root.Contents.Count) {
-              t.Inlines.Add(new LineBreak());
-            }
+            TextContainer(e, t.Inlines, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null, i + 1 == root.Contents.Count);
+            break;
+          case "pre":
+            TextContainer(e, t.Inlines, 1, FontWeights.Normal, Monospace, i + 1 == root.Contents.Count);
             break;
           default:
-            // TODO <pre> should be monospaced
-            System.Windows.Media.FontFamily fontFamily = null;
-            if (e.Name == "pre") {
-              fontFamily = Monospace;
-            }
-            foreach (HTML.Node node in e.Contents) {
-              t.Inlines.Add(ConvertToInline(node, 1, fontFamily));
-            }
-            if (i + 1 != root.Contents.Count) {
-              t.Inlines.Add(new LineBreak());
-            }
+            TextContainer(e, t.Inlines, 1, FontWeights.Normal, null, i + 1 == root.Contents.Count);
             break;
         }
         //Console.WriteLine("</{0}>", e.Name);
@@ -95,7 +59,46 @@ namespace RssReader
       return t;
     }
 
-    static private Inline ConvertToInline(HTML.Node n, double fontScale, System.Windows.Media.FontFamily fontFamily)
+    static private void ListContainer(HTML.Element e, InlineCollection inlines, Func<int,string> makeBullet)
+    {
+      Grid g = new Grid();
+      g.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+      g.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
+      int y = 0;
+      foreach (HTML.Element ee in e.Contents) {
+        //Console.WriteLine("<{0}>", ee.Name);
+        g.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+        TextBlock bullet = new TextBlock()
+        {
+          Text = makeBullet(y),
+          Margin = new Thickness(1),
+          HorizontalAlignment = HorizontalAlignment.Right,
+        };
+        Grid.SetColumn(bullet, 0);
+        Grid.SetRow(bullet, y);
+        g.Children.Add(bullet);
+        TextBlock content = HTMLToTextBlock(ee);
+        Grid.SetColumn(content, 1);
+        Grid.SetRow(content, y);
+        g.Children.Add(content);
+        ++y;
+        //Console.WriteLine("</{0}>", ee.Name);
+      }
+      inlines.Add(g);
+      inlines.Add(new LineBreak());
+    }
+
+    static private void TextContainer(HTML.Element e, InlineCollection inlines, double fontScale, FontWeight fontWeight, System.Windows.Media.FontFamily fontFamily, bool last)
+    {
+      foreach (HTML.Node node in e.Contents) {
+        inlines.Add(ConvertToInline(node, fontScale, fontWeight, fontFamily));
+      }
+      if (!last) {
+        inlines.Add(new LineBreak());
+      }
+    }
+
+    static private Inline ConvertToInline(HTML.Node n, double fontScale, FontWeight fontWeight, System.Windows.Media.FontFamily fontFamily)
     {
       HTML.Element e = n as HTML.Element;
       if (e != null) {
@@ -103,7 +106,7 @@ namespace RssReader
         //Console.WriteLine("<{0}>", e.Name);
         switch (e.Name) {
           case "b":
-          case "strong": newInline = new Bold(); break;
+          case "strong": newInline = new Span(); fontWeight = FontWeights.Bold; break;
           case "i":
           case "em": newInline = new Italic(); break;
           case "u": newInline = new Underline(); break;
@@ -174,7 +177,7 @@ namespace RssReader
         }
         if (newInline is Span) {
           foreach (HTML.Node node in e.Contents) {
-            (newInline as Span).Inlines.Add(ConvertToInline(node, fontScale, fontFamily));
+            (newInline as Span).Inlines.Add(ConvertToInline(node, fontScale, fontWeight, fontFamily));
           }
         }
         //Console.WriteLine("</{0}>", e.Name);
@@ -187,6 +190,7 @@ namespace RssReader
         if(fontFamily != null) {
           r.FontFamily = fontFamily;
         }
+        r.FontWeight = fontWeight;
         return r;
       }
     }
