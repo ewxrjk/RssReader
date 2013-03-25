@@ -69,6 +69,7 @@ namespace ReaderLib
     /// <param name="subscription"></param>
     public void Add(Subscription subscription)
     {
+      subscription.PropertyChanged += this.ChildPropertyChanged;
       _Subscriptions.Add(subscription);
       Dirty = true;
       SubscriptionAddedEventHandler handler = SubscriptionAdded;
@@ -89,6 +90,7 @@ namespace ReaderLib
       int index = _Subscriptions.FindIndex(candidate => candidate == subscription);
       if (index >= 0) {
         Dirty = true;
+        subscription.PropertyChanged += this.ChildPropertyChanged;
         _Subscriptions.RemoveAt(index);
         SubscriptionRemovedEventHandler handler = SubscriptionRemoved;
         if (handler != null) {
@@ -160,10 +162,16 @@ namespace ReaderLib
       }
       foreach (Subscription sub in sl.Subscriptions) {
         sub.Parent = sl;
+        sub.PropertyChanged += sl.ChildPropertyChanged;
       }
       // Remember where it came from
       sl.OriginalPath = Path;
       return sl;
+    }
+
+    private void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+      this.Dirty = true;
     }
 
     /// <summary>
