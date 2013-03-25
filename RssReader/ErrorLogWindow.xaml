@@ -1,0 +1,50 @@
+﻿<Window x:Class="RssReader.ErrorLogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RSS Reader Error Log"
+        Height="480" Width="640"
+        Closed="Window_Closed">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"></RowDefinition>
+      <RowDefinition Height="auto"></RowDefinition>
+    </Grid.RowDefinitions>
+    <ListView ItemsSource="{Binding Errors.Errors}" Name="Table">
+      <ListView.View>
+        <GridView>
+          <GridViewColumn Header="Time" Width="auto">
+            <GridViewColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding TimeString}" ToolTip="{Binding FullTimeString}"></TextBlock>
+              </DataTemplate>
+            </GridViewColumn.CellTemplate>
+          </GridViewColumn>
+          <GridViewColumn Header="Context" Width="128">
+            <GridViewColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Context}" ToolTip="{Binding Context}"></TextBlock>
+              </DataTemplate>
+            </GridViewColumn.CellTemplate>
+          </GridViewColumn>
+          <GridViewColumn Header="Description" Width="auto">
+            <GridViewColumn.CellTemplate>
+              <DataTemplate>
+                <Expander Header="{Binding Message}">
+                  <Expander.Content>
+                    <TextBox Text="{Binding Description}" IsReadOnly="True">
+                      <!-- TODO make scrollable -->
+                    </TextBox>
+                  </Expander.Content>
+                </Expander>
+              </DataTemplate>
+            </GridViewColumn.CellTemplate>
+          </GridViewColumn>
+        </GridView>
+      </ListView.View>
+    </ListView>
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+      <Button Click="Clear" Margin="4"  Width="64" Height="auto" ToolTip="Clear all errors">Clear</Button>
+      <Button Click="OK" Margin="4"  Width="64" Height="auto" ToolTip="Close this window" IsDefault="True">OK</Button>
+    </StackPanel>
+  </Grid>
+</Window>

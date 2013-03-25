@@ -1,0 +1,25 @@
+﻿<Window x:Class="RssReader.ErrorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Error"  
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        Width="auto"
+        Height="auto"
+        ResizeMode="CanResize"
+        SizeToContent="WidthAndHeight">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="auto"></RowDefinition>
+      <RowDefinition Height="*" MinHeight="64"></RowDefinition>
+      <RowDefinition Height="auto"></RowDefinition>
+    </Grid.RowDefinitions>
+    <TextBlock Grid.Row="0" Text="An error has occurred."></TextBlock>
+    <Expander Grid.Row="1" Header="{Binding Path=Summary}">
+      <Expander.Content>
+        <TextBox Text="{Binding Path=Trace}" IsReadOnly="True"><!-- TODO make scrollable --></TextBox>
+      </Expander.Content>
+    </Expander>
+    <Button Grid.Row="2" Click="OK"  Margin="4"  Width="64" Height="auto" IsDefault="True">OK</Button>
+  </Grid>
+</Window>

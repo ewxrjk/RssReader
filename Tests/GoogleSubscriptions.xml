@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+    <head>
+        <title>ewx subscriptions in Google Reader</title>
+    </head>
+    <body>
+        <outline text="Embedded in Academia"
+            title="Embedded in Academia" type="rss"
+            xmlUrl="http://blog.regehr.org/feed" htmlUrl="http://blog.regehr.org"/>
+        <outline text="john hawks weblog" title="john hawks weblog"
+            type="rss" xmlUrl="http://johnhawks.net/rss.xml" htmlUrl="http://johnhawks.net"/>
+        <outline text="LWN.net" title="LWN.net" type="rss"
+            xmlUrl="http://lwn.net/headlines/rss" htmlUrl="http://lwn.net"/>
+    </body>
+</opml>
