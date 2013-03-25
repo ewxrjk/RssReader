@@ -10,12 +10,13 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace RssReader
 {
   static public class RenderHTML
   {
-    static readonly System.Windows.Media.FontFamily Monospace = new System.Windows.Media.FontFamily("Global Monospace");
+    static readonly FontFamily Monospace = new FontFamily("Global Monospace");
 
     static public TextBlock Render(HTML.Document document)
     {
@@ -88,7 +89,7 @@ namespace RssReader
       inlines.Add(new LineBreak());
     }
 
-    static private void TextContainer(HTML.Element e, InlineCollection inlines, double fontScale, FontWeight fontWeight, System.Windows.Media.FontFamily fontFamily, bool last)
+    static private void TextContainer(HTML.Element e, InlineCollection inlines, double fontScale, FontWeight fontWeight, FontFamily fontFamily, bool last)
     {
       foreach (HTML.Node node in e.Contents) {
         inlines.Add(ConvertToInline(node, fontScale, fontWeight, fontFamily));
@@ -98,7 +99,7 @@ namespace RssReader
       }
     }
 
-    static private Inline ConvertToInline(HTML.Node n, double fontScale, FontWeight fontWeight, System.Windows.Media.FontFamily fontFamily)
+    static private Inline ConvertToInline(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily)
     {
       HTML.Element e = n as HTML.Element;
       if (e != null) {
@@ -132,7 +133,7 @@ namespace RssReader
             Uri ImageURI;
             if (e.Attributes.ContainsKey("src")
                 && Uri.TryCreate(e.Attributes["src"], UriKind.RelativeOrAbsolute, out ImageURI)) {
-              Image image = new Image() { Stretch = System.Windows.Media.Stretch.Fill };
+              Image image = new Image() { Stretch = Stretch.Fill };
               BitmapImage bitmapImage = new BitmapImage();
               bitmapImage.BeginInit();
               bitmapImage.UriSource = ImageURI;
