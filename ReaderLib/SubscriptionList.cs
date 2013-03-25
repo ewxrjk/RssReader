@@ -90,7 +90,7 @@ namespace ReaderLib
       int index = _Subscriptions.FindIndex(candidate => candidate == subscription);
       if (index >= 0) {
         Dirty = true;
-        subscription.PropertyChanged += this.ChildPropertyChanged;
+        subscription.PropertyChanged -= this.ChildPropertyChanged;
         _Subscriptions.RemoveAt(index);
         SubscriptionRemovedEventHandler handler = SubscriptionRemoved;
         if (handler != null) {
