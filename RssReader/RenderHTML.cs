@@ -15,6 +15,8 @@ namespace RssReader
 {
   static public class RenderHTML
   {
+    static readonly System.Windows.Media.FontFamily Monospace = new System.Windows.Media.FontFamily("Global Monospace");
+
     static public TextBlock Render(HTML.Document document)
     {
       return HTMLToTextBlock(document.HTML.Follow("body"));
@@ -67,7 +69,7 @@ namespace RssReader
             double fontScale = Math.Pow(1.125, '7' - e.Name[1]);
             Span s = new Span() { FontWeight = FontWeights.Bold };
             foreach (HTML.Node node in e.Contents) {
-              s.Inlines.Add(ConvertToInline(node, fontScale));
+              s.Inlines.Add(ConvertToInline(node, fontScale, null));
             }
             t.Inlines.Add(s);
             if (i + 1 != root.Contents.Count) {
@@ -76,9 +78,12 @@ namespace RssReader
             break;
           default:
             // TODO <pre> should be monospaced
-            // TODO <hN> should be emphasized somehow
+            System.Windows.Media.FontFamily fontFamily = null;
+            if (e.Name == "pre") {
+              fontFamily = Monospace;
+            }
             foreach (HTML.Node node in e.Contents) {
-              t.Inlines.Add(ConvertToInline(node, 1));
+              t.Inlines.Add(ConvertToInline(node, 1, fontFamily));
             }
             if (i + 1 != root.Contents.Count) {
               t.Inlines.Add(new LineBreak());
@@ -90,7 +95,7 @@ namespace RssReader
       return t;
     }
 
-    static private Inline ConvertToInline(HTML.Node n, double fontScale)
+    static private Inline ConvertToInline(HTML.Node n, double fontScale, System.Windows.Media.FontFamily fontFamily)
     {
       HTML.Element e = n as HTML.Element;
       if (e != null) {
@@ -104,7 +109,8 @@ namespace RssReader
           case "u": newInline = new Underline(); break;
           case "big": newInline = new Span(); fontScale *= 1.125; break;
           case "small": newInline = new Span(); fontScale /= 1.125; break;
-          case "tt": newInline = new Span(); newInline.FontFamily = new System.Windows.Media.FontFamily("monospace"); break; // TODO and subelements...
+          case "code":
+          case "tt": newInline = new Span(); fontFamily = Monospace; break;
           case "sub": newInline = new Span(); newInline.Typography.Variants = FontVariants.Subscript; break;
           case "sup": newInline = new Span(); newInline.Typography.Variants = FontVariants.Superscript; break;
           case "a":
@@ -168,7 +174,7 @@ namespace RssReader
         }
         if (newInline is Span) {
           foreach (HTML.Node node in e.Contents) {
-            (newInline as Span).Inlines.Add(ConvertToInline(node, fontScale));
+            (newInline as Span).Inlines.Add(ConvertToInline(node, fontScale, fontFamily));
           }
         }
         //Console.WriteLine("</{0}>", e.Name);
@@ -178,6 +184,9 @@ namespace RssReader
         //Console.WriteLine("text: [{0}]", ((HTML.Cdata)n).Content);
         Run r = new Run(((HTML.Cdata)n).Content);
         r.FontSize *= fontScale;
+        if(fontFamily != null) {
+          r.FontFamily = fontFamily;
+        }
         return r;
       }
     }
