@@ -191,5 +191,12 @@ namespace Tests
       Assert.AreEqual("what'ever'", img.Attributes["title"]);
       Assert.AreEqual("<html><body><p><img src=\"http://imgs.xkcd.com/comics/voyager_1.png\" title=\"what'ever'\"></p></body></html>", d.ToString());
     }
+
+    [TestMethod]
+    public void TestHTMLTable()
+    {
+      HTML.Document d = HTML.Document.Parse("<table><tr><td>a</td><td>b</td><tr><td>c</td>");
+      Assert.AreEqual("<html><body><table><tr><td>a</td><td>b</td></tr><tr><td>c</td></tr></table></body></html>", d.ToString());
+    }
   }
 }

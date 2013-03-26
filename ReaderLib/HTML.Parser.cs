@@ -239,7 +239,9 @@ namespace ReaderLib.HTML
       if (ctx == Context.CON && value.Length > 0) {
         ProcessContent(value.ToString());
       }
-      RequireBlockContext();
+      if (Elements.Count == 0) {
+        RequireBlockContext();
+      }
       return Document;
     }
 
@@ -280,6 +282,12 @@ namespace ReaderLib.HTML
     private void RequireBlockContext()
     {
       RequireSomeContext();
+      if(Elements.Peek().Name == "table") {
+        RequireTableRowContext();
+      }
+      if(Elements.Peek().Name == "tr") {
+        RequireTableCellContext();
+      }
       while (GetElementType(Elements.Peek().Name) == ElementType.Inline
              || GetElementType(Elements.Peek().Name) == ElementType.Block
              || GetElementType(Elements.Peek().Name) == ElementType.ListContainer) {
@@ -307,6 +315,54 @@ namespace ReaderLib.HTML
         else {
           ProcessOpenTag("ul", null);
         }
+      }
+    }
+
+    private void RequireTableContext()
+    {
+      RequireSomeContext();
+      while (Elements.Peek().Name != "table" && Elements.Peek().Name != "body") {
+        Elements.Pop();
+      }
+      if (Elements.Peek().Name != "table") {
+        ProcessOpenTag("table", null);
+      }
+    }
+
+    private void RequireTableRowContext()
+    {
+      RequireSomeContext();
+      while (Elements.Peek().Name != "tr"
+             && Elements.Peek().Name != "table"
+             && Elements.Peek().Name != "body") {
+        Elements.Pop();
+      }
+      if (Elements.Peek().Name != "tr") {
+        if (Elements.Peek().Name != "table") {
+          ProcessOpenTag("table", null);
+        }
+        ProcessOpenTag("tr", null);
+      }
+    }
+
+    private void RequireTableCellContext()
+    {
+      RequireSomeContext();
+      while (Elements.Peek().Name != "td"
+             && Elements.Peek().Name != "th"
+             && Elements.Peek().Name != "tr"
+             && Elements.Peek().Name != "table"
+             && Elements.Peek().Name != "body") {
+        Elements.Pop();
+      }
+      if (Elements.Peek().Name != "td" && Elements.Peek().Name != "th") {
+        if (Elements.Peek().Name != "tr") {
+          if (Elements.Peek().Name != "table") {
+            ProcessOpenTag("table", null);
+          }
+          ProcessOpenTag("tr", null);
+        }
+        ProcessOpenTag("td", null);
       }
     }
 
@@ -355,6 +411,12 @@ namespace ReaderLib.HTML
           case ElementType.Inline:
           case ElementType.InlineSingle:
             RequireInlineContext();
+            break;
+          case ElementType.TableRow:
+            RequireTableContext();
+            break;
+          case ElementType.TableCell:
+            RequireTableRowContext();
             break;
         }
       }
