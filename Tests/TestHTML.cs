@@ -196,7 +196,14 @@ namespace Tests
     public void TestHTMLTable()
     {
       HTML.Document d = HTML.Document.Parse("<table><tr><td>a</td><td>b</td><tr><td>c</td>");
-      Assert.AreEqual("<html><body><table><tr><td>a</td><td>b</td></tr><tr><td>c</td></tr></table></body></html>", d.ToString());
+      Assert.AreEqual("<html><body><table><tr><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
+    }
+
+    [TestMethod]
+    public void TestHTMLSpaceTable()
+    {
+      HTML.Document d = HTML.Document.Parse("<table>\n <tr>\n  <td>a</td>\n  <td>b</td>\n <tr>\n  <td>c</td>\n</table>\n");
+      Assert.AreEqual("<html><body><table><tr><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
     }
   }
 }

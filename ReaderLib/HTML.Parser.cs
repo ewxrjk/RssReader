@@ -290,6 +290,7 @@ namespace ReaderLib.HTML
       }
       while (GetElementType(Elements.Peek().Name) == ElementType.Inline
              || GetElementType(Elements.Peek().Name) == ElementType.Block
+             || GetElementType(Elements.Peek().Name) == ElementType.Table
              || GetElementType(Elements.Peek().Name) == ElementType.ListContainer) {
         Elements.Pop();
       }
@@ -368,10 +369,14 @@ namespace ReaderLib.HTML
 
     private void ProcessContent(string s)
     {
-      // Ignore whitespace outside of block-level elements
-      if (!StackContainsType(ElementType.Block)
-         && IsWhiteSpace(s)) {
-        return;
+      if(IsWhiteSpace(s)) {
+        if(Elements.Count == 0) {
+          return;
+        }
+        if(GetElementType(Elements.Peek().Name) != ElementType.Block
+           && GetElementType(Elements.Peek().Name) != ElementType.Inline) {
+          return;
+        }
       }
       RequireInlineContext();
       Elements.Peek().Contents.Add(new Cdata() { Content = s });
@@ -404,6 +409,7 @@ namespace ReaderLib.HTML
             RequireListContext();
             break;
           case ElementType.ListContainer:
+          case ElementType.Table:
           case ElementType.Block:
           case ElementType.BlockSingle:
             RequireBlockContext();
@@ -454,7 +460,6 @@ namespace ReaderLib.HTML
         Elements.Pop();
       }
     }
-
 
     private bool IsWhiteSpace(char c)
     {
