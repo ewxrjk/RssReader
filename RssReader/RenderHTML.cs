@@ -51,6 +51,9 @@ namespace RssReader
           case "pre":
             TextContainer(e, t.Inlines, 1, FontWeights.Normal, Monospace, i + 1 == root.Contents.Count);
             break;
+          case "table":
+            Table(e, t.Inlines);
+            break;
           default:
             TextContainer(e, t.Inlines, 1, FontWeights.Normal, null, i + 1 == root.Contents.Count);
             break;
@@ -58,6 +61,95 @@ namespace RssReader
         //Console.WriteLine("</{0}>", e.Name);
       }
       return t;
+    }
+
+    private struct TablePosition
+    {
+      public TablePosition(int row, int col)
+      {
+        this.row = row;
+        this.col = col;
+      }
+      public int row;
+      public int col;
+    }
+
+    private static bool Usable(ISet<TablePosition> occupied,
+                               int row, int col, int colspan)
+    {
+      while (colspan > 0) {
+        if (occupied.Contains(new TablePosition(row, col))) {
+          return false;
+        }
+        ++col;
+        --colspan;
+      }
+      return true;
+    }
+
+    static private void Table(HTML.Element e, InlineCollection inlines)
+    {
+      Grid g = new Grid();
+      HashSet<TablePosition> occupied = new HashSet<TablePosition>();
+      int maxrow = 0;
+      int maxcol = 0;
+      int row = 0;
+      int col;
+      Console.WriteLine("Render table: {0}", e);
+      foreach (HTML.Element r in e.Contents) {
+        col = 0;
+        foreach (HTML.Element c in e.Contents) {
+          int colspan = GetSpan(c, "colspan");
+          int rowspan = GetSpan(c, "rowspan");
+          while (!Usable(occupied, row, col, colspan)) {
+            ++col;
+          }
+          if (c.Contents.Count != 0) {
+            TextBlock content = HTMLToTextBlock(c);
+            Grid.SetColumn(content, col);
+            Grid.SetColumnSpan(content, colspan);
+            Grid.SetRow(content, row);
+            Grid.SetRowSpan(content, rowspan);
+            g.Children.Add(content);
+          }
+          for (int cn = 0; cn < colspan; ++cn) {
+            for (int rn = 0; rn < rowspan; ++rn) {
+              occupied.Add(new TablePosition(row + rn, col + cn));
+            }
+          }
+          if (row + rowspan - 1 > maxrow) {
+            maxrow = row + rowspan - 1;
+          }
+          col += colspan;
+        }
+        if (col - 1 > maxcol) {
+          maxcol = col - 1;
+        }
+        ++row;
+      }
+      for (row = 0; row <= maxrow; ++row) {
+        g.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+      }
+      for (col = 0; col <= maxcol; ++col) {
+        g.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+      }
+      inlines.Add(g);
+      inlines.Add(new LineBreak());
+    }
+
+    static private int GetSpan(HTML.Element e, string attribute)
+    {
+      string attributeValue;
+      if (e.Attributes.TryGetValue(attribute, out attributeValue)) {
+        int value;
+        if (int.TryParse(attributeValue, out value)) {
+          if (value < 1) {
+            value = 1;
+          }
+          return value;
+        }
+      }
+      return 1;
     }
 
     static private void ListContainer(HTML.Element e, InlineCollection inlines, Func<int,string> makeBullet)
