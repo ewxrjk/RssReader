@@ -214,12 +214,7 @@ namespace RssReader
         if (expander.Content == null) {
           EntryViewModel evm = expander.Tag as EntryViewModel;
           if (evm != null) {
-            expander.Content = RenderHTML.Render(evm.HtmlDescription,
-                                                 new Binding()
-                                                 {
-                                                   Path = new PropertyPath("ViewportWidth"),
-                                                   Source = EntriesScrollViewer
-                                                 });
+            expander.Content = RenderHTML.Render(evm.HtmlDescription, EntriesScrollViewer);
           }
         }
       }

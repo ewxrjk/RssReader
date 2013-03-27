@@ -11,6 +11,8 @@ using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace RssReader
 {
@@ -19,13 +21,13 @@ namespace RssReader
     static readonly FontFamily Monospace = new FontFamily("Global Monospace");
 
     static public FrameworkElement Render(HTML.Document document,
-                                          Binding widthBinding = null)
+                                          ScrollViewer scrollviewer)
     {
-      return RenderBlocks(document.HTML.Follow("body"), widthBinding);
+      return RenderBlocks(document.HTML.Follow("body"), scrollviewer);
     }
 
     static private FrameworkElement RenderBlocks(HTML.Element root,
-                                                 Binding widthBinding = null)
+                                                 ScrollViewer scrollviewer)
     {
       /*
        * TextBlock container = new TextBlock()
@@ -44,13 +46,13 @@ namespace RssReader
           case "ul":
             children.Add(RenderList(e,
                                     y => "•",
-                                    widthBinding));
+                                    scrollviewer));
             //children.Add(new LineBreak());
             break;
           case "ol":
             children.Add(RenderList(e,
                                     y => string.Format("{0}.", y + 1),
-                                    widthBinding));
+                                    scrollviewer));
             //children.Add(new LineBreak());
             break;
           case "h1":
@@ -59,23 +61,23 @@ namespace RssReader
           case "h4":
           case "h5":
           case "h6":
-            children.Add(RenderParagraph(e, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null, widthBinding));
+            children.Add(RenderParagraph(e, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null, scrollviewer));
             if (i + 1 != root.Contents.Count) {
               //children.Add(new LineBreak());
             }
             break;
           case "pre":
-            children.Add(RenderParagraph(e, 1, FontWeights.Normal, Monospace, widthBinding));
+            children.Add(RenderParagraph(e, 1, FontWeights.Normal, Monospace, scrollviewer));
             if (i + 1 != root.Contents.Count) {
               //children.Add(new LineBreak());
             }
             break;
           case "table":
-            children.Add(RenderTable(e, widthBinding));
+            children.Add(RenderTable(e, scrollviewer));
             //children.Add(new LineBreak());
             break;
           default:
-            children.Add(RenderParagraph(e, 1, FontWeights.Normal, null, widthBinding));
+            children.Add(RenderParagraph(e, 1, FontWeights.Normal, null, scrollviewer));
             if (i + 1 != root.Contents.Count) {
               //children.Add(new LineBreak());
             }
@@ -110,11 +112,16 @@ namespace RssReader
       return true;
     }
 
-    static UIElement RenderTable(HTML.Element e, Binding widthBinding)
+    static UIElement RenderTable(HTML.Element e, ScrollViewer scrollviewer)
     {
       Grid g = new Grid();
-      if (widthBinding != null) {
-        g.SetBinding(Grid.MaxWidthProperty, widthBinding);
+      if (scrollviewer != null) {
+        g.SetBinding(Grid.MaxWidthProperty,
+                     new Binding()
+                     {
+                       Source = scrollviewer,
+                       Path = new PropertyPath("ViewportWidth"),
+                     });
       }
       HashSet<TablePosition> occupied = new HashSet<TablePosition>();
       int maxrow = 0;
@@ -131,7 +138,7 @@ namespace RssReader
             ++col;
           }
           if (c.Contents.Count != 0) {
-            FrameworkElement content = RenderBlocks(c);
+            FrameworkElement content = RenderBlocks(c, scrollviewer);
             Grid.SetColumn(content, col);
             Grid.SetColumnSpan(content, colspan);
             Grid.SetRow(content, row);
@@ -177,11 +184,16 @@ namespace RssReader
       return 1;
     }
 
-    static private UIElement RenderList(HTML.Element e, Func<int, string> makeBullet, Binding widthBinding)
+    static private UIElement RenderList(HTML.Element e, Func<int, string> makeBullet, ScrollViewer scrollviewer)
     {
       Grid g = new Grid();
-      if (widthBinding != null) {
-        g.SetBinding(Grid.MaxWidthProperty, widthBinding);
+      if (scrollviewer != null) {
+        g.SetBinding(Grid.MaxWidthProperty,
+                     new Binding()
+                     {
+                       Source = scrollviewer,
+                       Path = new PropertyPath("ViewportWidth"),
+                     });
       }
       g.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
       g.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
@@ -192,13 +204,13 @@ namespace RssReader
         TextBlock bullet = new TextBlock()
         {
           Text = makeBullet(y),
-          Margin = new Thickness(1),
+          Padding = new Thickness(2),
           HorizontalAlignment = HorizontalAlignment.Right,
         };
         Grid.SetColumn(bullet, 0);
         Grid.SetRow(bullet, y);
         g.Children.Add(bullet);
-        FrameworkElement content = RenderBlocks(ee);
+        FrameworkElement content = RenderBlocks(ee, scrollviewer);
         Grid.SetColumn(content, 1);
         Grid.SetRow(content, y);
         g.Children.Add(content);
@@ -212,18 +224,25 @@ namespace RssReader
                                              double fontScale,
                                              FontWeight fontWeight,
                                              FontFamily fontFamily,
-                                             Binding widthBinding)
+                                             ScrollViewer scrollviewer)
     {
       TextBlock t = new TextBlock()
       {
-        TextWrapping = TextWrapping.WrapWithOverflow
+        TextWrapping = TextWrapping.Wrap,
+        Padding = new Thickness(2),
+        HorizontalAlignment = HorizontalAlignment.Left,
       };
-      if (widthBinding != null) {
-        t.SetBinding(TextBlock.MaxWidthProperty, widthBinding);
-        // TODO if there are images, bump MaxWidth to the width of the widest.  somehow...
-      }
+      ParagraphSizeTracker pst = new ParagraphSizeTracker() {
+        Container = scrollviewer
+      };
+      t.SetBinding(TextBlock.MaxWidthProperty,
+                   new Binding()
+                   {
+                     Source = pst,
+                     Path = new PropertyPath("Width")
+                   });
       foreach (HTML.Node node in e.Contents) {
-        Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily);
+        Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily, pst);
         if (i != null) {
           t.Inlines.Add(i);
         }
@@ -231,7 +250,7 @@ namespace RssReader
       return t;
     }
 
-    static private Inline RenderInlines(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily)
+    static private Inline RenderInlines(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily, ParagraphSizeTracker pst)
     {
       HTML.Element e = n as HTML.Element;
       if (e != null) {
@@ -253,14 +272,14 @@ namespace RssReader
             newInline = RenderHyperlink(e);
             break;
           case "img":
-            newInline = RenderImage(e);
+            newInline = RenderImage(e, pst);
             break;
           // TODO map, anything else?
           default: newInline = new Span(); break;
         }
         if (newInline is Span) {
           foreach (HTML.Node node in e.Contents) {
-            Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily);
+            Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily, pst);
             if (i != null) {
               (newInline as Span).Inlines.Add(i);
             }
@@ -301,7 +320,7 @@ namespace RssReader
       e.Handled = true;
     }
 
-    static private Inline RenderImage(HTML.Element e)
+    static private Inline RenderImage(HTML.Element e, ParagraphSizeTracker pst)
     {
       Uri ImageURI;
       if (e.Attributes.ContainsKey("src")
@@ -332,6 +351,10 @@ namespace RssReader
           Path = new PropertyPath("Source.PixelHeight"),
           Source = image,
         });
+        // Communicate image size info back up to the container
+        if (pst != null) {
+          pst.Add(image);
+        }
         if (e.Attributes.ContainsKey("title")) {
           image.ToolTip = e.Attributes["title"];
         }
@@ -347,6 +370,70 @@ namespace RssReader
       }
     }
 
+    private class ParagraphSizeTracker : INotifyPropertyChanged
+    {
+      public double Width
+      {
+        get {
+          double m = Images.Count() > 0 ? (from image in Images select image.Width).Max() : 0;
+          return Container != null ? Math.Max(m, Container.ViewportWidth) : m;
+        }
+      }
+
+      public void Add(Image i)
+      {
+        Images.Add(i);
+        i.SizeChanged += ChildSizeChanged;
+      }
+
+      private Collection<Image> Images = new Collection<Image>();
+
+      private void ChildSizeChanged(object sender, SizeChangedEventArgs e)
+      {
+        OnPropertyChanged("Width");
+      }
+
+      public ScrollViewer Container
+      {
+        get
+        {
+          return _Container;
+        }
+        set
+        {
+          if (_Container != null) {
+            _Container.ScrollChanged -= ContainerScrollChanged;
+          }
+          if (value != null) {
+            value.ScrollChanged += ContainerScrollChanged;
+          }
+          _Container = value;
+        }
+      }
+
+      private ScrollViewer _Container = null;
+
+      private void ContainerScrollChanged(object sender, ScrollChangedEventArgs e) {
+        if (e.ViewportWidthChange != 0) {
+          OnPropertyChanged("Width");
+        }
+      }
+
+      #region INotifyPropertyChanged
+
+      public event PropertyChangedEventHandler PropertyChanged;
+
+      public void OnPropertyChanged(string propertyName)
+      {
+        PropertyChangedEventHandler handler = PropertyChanged;
+        if (handler != null) {
+          handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+      }
+
+      #endregion
+
+    }
 
   }
 }
