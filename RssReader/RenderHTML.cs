@@ -376,7 +376,16 @@ namespace RssReader
       {
         get {
           double m = Images.Count() > 0 ? (from image in Images select image.Width).Max() : 0;
-          return Container != null ? Math.Max(m, Container.ViewportWidth) : m;
+          if (Container != null) {
+            double cw = Container.ViewportWidth - 4;
+            if (cw > m) {
+              m = cw;
+            }
+          }
+          if(96 > m) {
+            m = 96; // Set a minimum
+          }
+          return m;
         }
       }
 
