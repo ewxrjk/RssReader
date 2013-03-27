@@ -18,30 +18,40 @@ namespace RssReader
   {
     static readonly FontFamily Monospace = new FontFamily("Global Monospace");
 
-    static public TextBlock Render(HTML.Document document)
+    static public FrameworkElement Render(HTML.Document document,
+                                          Binding widthBinding = null)
     {
-      return HTMLToTextBlock(document.HTML.Follow("body"));
+      return RenderBlocks(document.HTML.Follow("body"), widthBinding);
     }
 
-    static private TextBlock HTMLToTextBlock(HTML.Element root,
-                                             Binding widthBinding = null)
+    static private FrameworkElement RenderBlocks(HTML.Element root,
+                                                 Binding widthBinding = null)
     {
-      TextBlock t = new TextBlock()
-      {
-        TextWrapping = TextWrapping.Wrap,
-        Margin = new Thickness(1),
-      };
+      /*
+       * TextBlock container = new TextBlock()
+              {
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(1),
+              };
+            }
+       */
+      StackPanel container = new StackPanel();
+      UIElementCollection children = container.Children;
       for (int i = 0; i < root.Contents.Count; ++i) {
         HTML.Element e = root.Contents[i] as HTML.Element;
         //Console.WriteLine("<{0}>", e.Name);
         switch (e.Name) {
           case "ul":
-            ListContainer(e, t.Inlines, y => "•");
-            t.Inlines.Add(new LineBreak());
+            children.Add(RenderList(e,
+                                    y => "•",
+                                    widthBinding));
+            //children.Add(new LineBreak());
             break;
           case "ol":
-            ListContainer(e, t.Inlines, y => string.Format("{0}.", y + 1));
-            t.Inlines.Add(new LineBreak());
+            children.Add(RenderList(e,
+                                    y => string.Format("{0}.", y + 1),
+                                    widthBinding));
+            //children.Add(new LineBreak());
             break;
           case "h1":
           case "h2":
@@ -49,31 +59,31 @@ namespace RssReader
           case "h4":
           case "h5":
           case "h6":
-            TextContainer(e, t.Inlines, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null);
+            children.Add(RenderParagraph(e, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null, widthBinding));
             if (i + 1 != root.Contents.Count) {
-              t.Inlines.Add(new LineBreak());
+              //children.Add(new LineBreak());
             }
             break;
           case "pre":
-            TextContainer(e, t.Inlines, 1, FontWeights.Normal, Monospace);
+            children.Add(RenderParagraph(e, 1, FontWeights.Normal, Monospace, widthBinding));
             if (i + 1 != root.Contents.Count) {
-              t.Inlines.Add(new LineBreak());
+              //children.Add(new LineBreak());
             }
             break;
           case "table":
-            Table(e, t.Inlines);
-            t.Inlines.Add(new LineBreak());
+            children.Add(RenderTable(e, widthBinding));
+            //children.Add(new LineBreak());
             break;
           default:
-            TextContainer(e, t.Inlines, 1, FontWeights.Normal, null);
+            children.Add(RenderParagraph(e, 1, FontWeights.Normal, null, widthBinding));
             if (i + 1 != root.Contents.Count) {
-              t.Inlines.Add(new LineBreak());
+              //children.Add(new LineBreak());
             }
             break;
         }
         //Console.WriteLine("</{0}>", e.Name);
       }
-      return t;
+      return container;
     }
 
     private struct TablePosition
@@ -100,9 +110,12 @@ namespace RssReader
       return true;
     }
 
-    static private void Table(HTML.Element e, InlineCollection inlines)
+    static UIElement RenderTable(HTML.Element e, Binding widthBinding)
     {
       Grid g = new Grid();
+      if (widthBinding != null) {
+        g.SetBinding(Grid.MaxWidthProperty, widthBinding);
+      }
       HashSet<TablePosition> occupied = new HashSet<TablePosition>();
       int maxrow = 0;
       int maxcol = 0;
@@ -118,7 +131,7 @@ namespace RssReader
             ++col;
           }
           if (c.Contents.Count != 0) {
-            TextBlock content = HTMLToTextBlock(c);
+            FrameworkElement content = RenderBlocks(c);
             Grid.SetColumn(content, col);
             Grid.SetColumnSpan(content, colspan);
             Grid.SetRow(content, row);
@@ -146,7 +159,7 @@ namespace RssReader
       for (col = 0; col <= maxcol; ++col) {
         g.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
       }
-      inlines.Add(g);
+      return g;
     }
 
     static private int GetSpan(HTML.Element e, string attribute)
@@ -164,9 +177,12 @@ namespace RssReader
       return 1;
     }
 
-    static private void ListContainer(HTML.Element e, InlineCollection inlines, Func<int,string> makeBullet)
+    static private UIElement RenderList(HTML.Element e, Func<int, string> makeBullet, Binding widthBinding)
     {
       Grid g = new Grid();
+      if (widthBinding != null) {
+        g.SetBinding(Grid.MaxWidthProperty, widthBinding);
+      }
       g.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
       g.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
       int y = 0;
@@ -182,24 +198,36 @@ namespace RssReader
         Grid.SetColumn(bullet, 0);
         Grid.SetRow(bullet, y);
         g.Children.Add(bullet);
-        TextBlock content = HTMLToTextBlock(ee);
+        FrameworkElement content = RenderBlocks(ee);
         Grid.SetColumn(content, 1);
         Grid.SetRow(content, y);
         g.Children.Add(content);
         ++y;
         //Console.WriteLine("</{0}>", ee.Name);
       }
-      inlines.Add(g);
+      return g;
     }
 
-    static private void TextContainer(HTML.Element e, InlineCollection inlines, double fontScale, FontWeight fontWeight, FontFamily fontFamily)
+    static private UIElement RenderParagraph(HTML.Element e,
+                                             double fontScale,
+                                             FontWeight fontWeight,
+                                             FontFamily fontFamily,
+                                             Binding widthBinding)
     {
-      foreach (HTML.Node node in e.Contents) {
-        inlines.Add(ConvertToInline(node, fontScale, fontWeight, fontFamily));
+      TextBlock t = new TextBlock()
+      {
+        TextWrapping = TextWrapping.WrapWithOverflow
+      };
+      if (widthBinding != null) {
+        t.SetBinding(TextBlock.MaxWidthProperty, widthBinding);
       }
+      foreach (HTML.Node node in e.Contents) {
+        t.Inlines.Add(RenderInlines(node, fontScale, fontWeight, fontFamily));
+      }
+      return t;
     }
 
-    static private Inline ConvertToInline(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily)
+    static private Inline RenderInlines(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily)
     {
       HTML.Element e = n as HTML.Element;
       if (e != null) {
@@ -278,7 +306,7 @@ namespace RssReader
         }
         if (newInline is Span) {
           foreach (HTML.Node node in e.Contents) {
-            (newInline as Span).Inlines.Add(ConvertToInline(node, fontScale, fontWeight, fontFamily));
+            (newInline as Span).Inlines.Add(RenderInlines(node, fontScale, fontWeight, fontFamily));
           }
         }
         //Console.WriteLine("</{0}>", e.Name);
@@ -288,7 +316,7 @@ namespace RssReader
         //Console.WriteLine("text: [{0}]", ((HTML.Cdata)n).Content);
         Run r = new Run(((HTML.Cdata)n).Content);
         r.FontSize *= fontScale;
-        if(fontFamily != null) {
+        if (fontFamily != null) {
           r.FontFamily = fontFamily;
         }
         r.FontWeight = fontWeight;

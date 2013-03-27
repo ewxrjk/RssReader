@@ -26,7 +26,7 @@ namespace RssReader
           OnPropertyChanged(e.PropertyName);
           break;
         case "Description":
-          OnPropertyChanged("RenderedDescription");
+          OnPropertyChanged("HTML");
           OnPropertyChanged(e.PropertyName);
           break;
         case "Read":
@@ -54,11 +54,11 @@ namespace RssReader
       }
     }
 
-    public TextBlock RenderedDescription
+    public HTML.Document HtmlDescription
     {
       get
       {
-        return RenderHTML.Render(HTML.Document.Parse(Description));
+        return HTML.Document.Parse(Description);
       }
     }
 

@@ -211,10 +211,15 @@ namespace RssReader
       // if content changes while collapsed, just throw rendered form away.
       Expander expander = (sender as Expander);
       if (expander != null) {
-        if(expander.Content == null) {
+        if (expander.Content == null) {
           EntryViewModel evm = expander.Tag as EntryViewModel;
           if (evm != null) {
-            expander.Content = evm.RenderedDescription;
+            expander.Content = RenderHTML.Render(evm.HtmlDescription,
+                                                 new Binding()
+                                                 {
+                                                   Path = new PropertyPath("ViewportWidth"),
+                                                   Source = EntriesScrollViewer
+                                                 });
           }
         }
       }
