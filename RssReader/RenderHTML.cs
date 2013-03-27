@@ -23,7 +23,8 @@ namespace RssReader
       return HTMLToTextBlock(document.HTML.Follow("body"));
     }
 
-    static private TextBlock HTMLToTextBlock(HTML.Element root)
+    static private TextBlock HTMLToTextBlock(HTML.Element root,
+                                             Binding widthBinding = null)
     {
       TextBlock t = new TextBlock()
       {
@@ -36,9 +37,11 @@ namespace RssReader
         switch (e.Name) {
           case "ul":
             ListContainer(e, t.Inlines, y => "•");
+            t.Inlines.Add(new LineBreak());
             break;
           case "ol":
             ListContainer(e, t.Inlines, y => string.Format("{0}.", y + 1));
+            t.Inlines.Add(new LineBreak());
             break;
           case "h1":
           case "h2":
@@ -46,16 +49,26 @@ namespace RssReader
           case "h4":
           case "h5":
           case "h6":
-            TextContainer(e, t.Inlines, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null, i + 1 == root.Contents.Count);
+            TextContainer(e, t.Inlines, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null);
+            if (i + 1 != root.Contents.Count) {
+              t.Inlines.Add(new LineBreak());
+            }
             break;
           case "pre":
-            TextContainer(e, t.Inlines, 1, FontWeights.Normal, Monospace, i + 1 == root.Contents.Count);
+            TextContainer(e, t.Inlines, 1, FontWeights.Normal, Monospace);
+            if (i + 1 != root.Contents.Count) {
+              t.Inlines.Add(new LineBreak());
+            }
             break;
           case "table":
             Table(e, t.Inlines);
+            t.Inlines.Add(new LineBreak());
             break;
           default:
-            TextContainer(e, t.Inlines, 1, FontWeights.Normal, null, i + 1 == root.Contents.Count);
+            TextContainer(e, t.Inlines, 1, FontWeights.Normal, null);
+            if (i + 1 != root.Contents.Count) {
+              t.Inlines.Add(new LineBreak());
+            }
             break;
         }
         //Console.WriteLine("</{0}>", e.Name);
@@ -134,7 +147,6 @@ namespace RssReader
         g.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
       }
       inlines.Add(g);
-      inlines.Add(new LineBreak());
     }
 
     static private int GetSpan(HTML.Element e, string attribute)
@@ -178,16 +190,12 @@ namespace RssReader
         //Console.WriteLine("</{0}>", ee.Name);
       }
       inlines.Add(g);
-      inlines.Add(new LineBreak());
     }
 
-    static private void TextContainer(HTML.Element e, InlineCollection inlines, double fontScale, FontWeight fontWeight, FontFamily fontFamily, bool last)
+    static private void TextContainer(HTML.Element e, InlineCollection inlines, double fontScale, FontWeight fontWeight, FontFamily fontFamily)
     {
       foreach (HTML.Node node in e.Contents) {
         inlines.Add(ConvertToInline(node, fontScale, fontWeight, fontFamily));
-      }
-      if (!last) {
-        inlines.Add(new LineBreak());
       }
     }
 
