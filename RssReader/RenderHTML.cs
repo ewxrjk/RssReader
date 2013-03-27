@@ -220,9 +220,13 @@ namespace RssReader
       };
       if (widthBinding != null) {
         t.SetBinding(TextBlock.MaxWidthProperty, widthBinding);
+        // TODO if there are images, bump MaxWidth to the width of the widest.  somehow...
       }
       foreach (HTML.Node node in e.Contents) {
-        t.Inlines.Add(RenderInlines(node, fontScale, fontWeight, fontFamily));
+        Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily);
+        if (i != null) {
+          t.Inlines.Add(i);
+        }
       }
       return t;
     }
@@ -246,67 +250,20 @@ namespace RssReader
           case "sub": newInline = new Span(); newInline.Typography.Variants = FontVariants.Subscript; break;
           case "sup": newInline = new Span(); newInline.Typography.Variants = FontVariants.Superscript; break;
           case "a":
-            Hyperlink h = new Hyperlink();
-            if (e.Attributes.ContainsKey("href")) {
-              Uri TargetURI;
-              if (Uri.TryCreate(e.Attributes["href"], UriKind.RelativeOrAbsolute, out TargetURI)) {
-                h.NavigateUri = TargetURI;
-                h.RequestNavigate += RequestedNavigate;
-              }
-              h.ToolTip = e.Attributes["href"]; // tooltip contains URI even if it's bad
-            }
-            newInline = h;
+            newInline = RenderHyperlink(e);
             break;
           case "img":
-            Uri ImageURI;
-            if (e.Attributes.ContainsKey("src")
-                && Uri.TryCreate(e.Attributes["src"], UriKind.RelativeOrAbsolute, out ImageURI)) {
-              Image image = new Image() { Stretch = Stretch.Fill };
-              BitmapImage bitmapImage = new BitmapImage();
-              bitmapImage.BeginInit();
-              bitmapImage.UriSource = ImageURI;
-              bitmapImage.EndInit();
-              image.Source = bitmapImage;
-              // This hack forces image size to match pixel size,
-              // which undermines WPF's preference for honoring the
-              // embedded DPI value which leads to upscaled and
-              // mildly blurry images where that doesn't match
-              // the local display.  Very high resolution displays
-              // might need another approach.
-              //
-              // It seems to be necessary to have Source=image and
-              // use a two-component path, rather than having
-              // Source=bitmapImage.  TODO understand why.
-              image.SetBinding(Image.WidthProperty, new Binding()
-              {
-                Path = new PropertyPath("Source.PixelWidth"),
-                Source = image,
-              });
-              image.SetBinding(Image.HeightProperty, new Binding()
-              {
-                Path = new PropertyPath("Source.PixelHeight"),
-                Source = image,
-              });
-              if (e.Attributes.ContainsKey("title")) {
-                image.ToolTip = e.Attributes["title"];
-              }
-              else if (e.Attributes.ContainsKey("alt")) {
-                image.ToolTip = e.Attributes["alt"];
-              }
-              // TODO arrange to display alt value if image can't be loaded
-              // (or before it has loaded)
-              newInline = new InlineUIContainer() { Child = image };
-            }
-            else {
-              newInline = new Span(); // bit of a hack
-            }
+            newInline = RenderImage(e);
             break;
           // TODO map, anything else?
           default: newInline = new Span(); break;
         }
         if (newInline is Span) {
           foreach (HTML.Node node in e.Contents) {
-            (newInline as Span).Inlines.Add(RenderInlines(node, fontScale, fontWeight, fontFamily));
+            Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily);
+            if (i != null) {
+              (newInline as Span).Inlines.Add(i);
+            }
           }
         }
         //Console.WriteLine("</{0}>", e.Name);
@@ -324,11 +281,72 @@ namespace RssReader
       }
     }
 
+    static private Inline RenderHyperlink(HTML.Element e)
+    {
+      Hyperlink h = new Hyperlink();
+      if (e.Attributes.ContainsKey("href")) {
+        Uri TargetURI;
+        if (Uri.TryCreate(e.Attributes["href"], UriKind.RelativeOrAbsolute, out TargetURI)) {
+          h.NavigateUri = TargetURI;
+          h.RequestNavigate += RequestedNavigate;
+        }
+        h.ToolTip = e.Attributes["href"]; // tooltip contains URI even if it's bad
+      }
+      return h;
+    }
+
     static private void RequestedNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
     {
       System.Diagnostics.Process.Start(e.Uri.ToString());
       e.Handled = true;
     }
+
+    static private Inline RenderImage(HTML.Element e)
+    {
+      Uri ImageURI;
+      if (e.Attributes.ContainsKey("src")
+          && Uri.TryCreate(e.Attributes["src"], UriKind.RelativeOrAbsolute, out ImageURI)) {
+        Image image = new Image() { Stretch = Stretch.Fill };
+        BitmapImage bitmapImage = new BitmapImage();
+        bitmapImage.BeginInit();
+        bitmapImage.UriSource = ImageURI;
+        bitmapImage.EndInit();
+        image.Source = bitmapImage;
+        // This hack forces image size to match pixel size,
+        // which undermines WPF's preference for honoring the
+        // embedded DPI value which leads to upscaled and
+        // mildly blurry images where that doesn't match
+        // the local display.  Very high resolution displays
+        // might need another approach.
+        //
+        // It seems to be necessary to have Source=image and
+        // use a two-component path, rather than having
+        // Source=bitmapImage.  TODO understand why.
+        image.SetBinding(Image.WidthProperty, new Binding()
+        {
+          Path = new PropertyPath("Source.PixelWidth"),
+          Source = image,
+        });
+        image.SetBinding(Image.HeightProperty, new Binding()
+        {
+          Path = new PropertyPath("Source.PixelHeight"),
+          Source = image,
+        });
+        if (e.Attributes.ContainsKey("title")) {
+          image.ToolTip = e.Attributes["title"];
+        }
+        else if (e.Attributes.ContainsKey("alt")) {
+          image.ToolTip = e.Attributes["alt"];
+        }
+        // TODO arrange to display alt value if image can't be loaded
+        // (or before it has loaded)
+        return new InlineUIContainer() { Child = image };
+      }
+      else {
+        return null;
+      }
+    }
+
 
   }
 }
