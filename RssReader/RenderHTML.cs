@@ -48,13 +48,11 @@ namespace RssReader
             children.Add(RenderList(e,
                                     y => "•",
                                     scrollviewer));
-            //children.Add(new LineBreak());
             break;
           case "ol":
             children.Add(RenderList(e,
                                     y => string.Format("{0}.", y + 1),
                                     scrollviewer));
-            //children.Add(new LineBreak());
             break;
           case "h1":
           case "h2":
@@ -63,25 +61,15 @@ namespace RssReader
           case "h5":
           case "h6":
             children.Add(RenderParagraph(e, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null, scrollviewer));
-            if (i + 1 != root.Contents.Count) {
-              //children.Add(new LineBreak());
-            }
             break;
           case "pre":
             children.Add(RenderParagraph(e, 1, FontWeights.Normal, Monospace, scrollviewer));
-            if (i + 1 != root.Contents.Count) {
-              //children.Add(new LineBreak());
-            }
             break;
           case "table":
             children.Add(RenderTable(e, scrollviewer));
-            //children.Add(new LineBreak());
             break;
           default:
             children.Add(RenderParagraph(e, 1, FontWeights.Normal, null, scrollviewer));
-            if (i + 1 != root.Contents.Count) {
-              //children.Add(new LineBreak());
-            }
             break;
         }
         //Console.WriteLine("</{0}>", e.Name);
@@ -233,7 +221,8 @@ namespace RssReader
         Padding = new Thickness(2),
         HorizontalAlignment = HorizontalAlignment.Left,
       };
-      ParagraphSizeTracker pst = new ParagraphSizeTracker() {
+      ParagraphSizeTracker pst = new ParagraphSizeTracker()
+      {
         Container = scrollviewer
       };
       t.SetBinding(TextBlock.MaxWidthProperty,
@@ -402,7 +391,8 @@ namespace RssReader
     {
       public double Width
       {
-        get {
+        get
+        {
           double m = 96; // minimum
           foreach (Image image in Images) {
             if (!double.IsNaN(image.Width) && image.Width > m) {
@@ -452,7 +442,8 @@ namespace RssReader
 
       private ScrollViewer _Container = null;
 
-      private void ContainerScrollChanged(object sender, ScrollChangedEventArgs e) {
+      private void ContainerScrollChanged(object sender, ScrollChangedEventArgs e)
+      {
         if (e.ViewportWidthChange != 0) {
           OnPropertyChanged("Width");
         }
