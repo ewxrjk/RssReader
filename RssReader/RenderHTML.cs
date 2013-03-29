@@ -103,7 +103,10 @@ namespace RssReader
 
     UIElement RenderTable(HTML.Element e, ScrollViewer scrollviewer)
     {
-      Grid g = new Grid();
+      Grid g = new Grid()
+      {
+        HorizontalAlignment = HorizontalAlignment.Left,
+      };
       if (scrollviewer != null) {
         g.SetBinding(Grid.MaxWidthProperty,
                      new Binding()
@@ -175,7 +178,10 @@ namespace RssReader
 
     private UIElement RenderList(HTML.Element e, Func<int, string> makeBullet, ScrollViewer scrollviewer)
     {
-      Grid g = new Grid();
+      Grid g = new Grid()
+      {
+        HorizontalAlignment = HorizontalAlignment.Left,
+      };
       if (scrollviewer != null) {
         g.SetBinding(Grid.MaxWidthProperty,
                      new Binding()
