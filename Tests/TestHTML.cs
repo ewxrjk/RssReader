@@ -205,5 +205,15 @@ namespace Tests
       HTML.Document d = HTML.Document.Parse("<table>\n <tr>\n  <td>a</td>\n  <td>b</td>\n <tr>\n  <td>c</td>\n</table>\n");
       Assert.AreEqual("<html><body><table><tr><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
     }
+
+    [TestMethod]
+    public void TestHTMLComment()
+    {
+      HTML.Document d = HTML.Document.Parse("<!--comment-->spong");
+      Assert.AreEqual("<html><body><p>spong</p></body></html>", d.ToString());
+      d = HTML.Document.Parse("this and <!--comment--> that");
+      Assert.AreEqual("<html><body><p>this and  that</p></body></html>", d.ToString());
+    }
+
   }
 }

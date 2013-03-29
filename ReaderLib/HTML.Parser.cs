@@ -117,11 +117,14 @@ namespace ReaderLib.HTML
 
         if (t == TokenType.mdo) {
           stack.Push(ctx);
+          valueStack.Push(value);
+          value = new StringBuilder();
           ctx = Context.MD;
           continue;
         }
         if (t == TokenType.mdc) {
           ctx = stack.Pop();
+          value = valueStack.Pop();
           continue;
         }
 
