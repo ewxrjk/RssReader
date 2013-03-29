@@ -196,7 +196,42 @@ namespace ReaderLib
       }
     }
 
-    private XElement GetMandatoryElement(XElement container, string name,
+    private void UpdateEntry(XElement item,
+                             string id, 
+                             Action<WebEntry, XElement, Action<Exception>> update,
+                             Action<Exception> error)
+    {
+      WebEntry entry = null;
+      bool newEntry = false;
+      // Find out what we know
+      entry = (WebEntry)_Entries.Entries.GetValueOrDefault(id, null);
+      if (entry == null) {
+        // A new entry.
+        entry = new WebEntry()
+        {
+          Identity = id,
+          Serial = this.NextSerial++,
+          Parent = this,
+          Container = _Entries,
+        };
+        newEntry = true;
+      }
+      // Update the item
+      try {
+        update(entry, item, error);
+      }
+      catch (SubscriptionParsingException spe) {
+        spe.Subscription = this;
+        error(spe);
+      }
+      // If anything new was created, record it
+      if (newEntry) {
+        Add(entry);
+      }
+
+    }
+
+    private XElement GetMandatoryElement(XElement container, XName name,
                                          Action<Action> dispatch, Action<Exception> error)
     {
       XElement element = container.Element(name);
@@ -212,39 +247,22 @@ namespace ReaderLib
       return element;
     }
 
-    /// <summary>
-    /// Find the unique ID for an item
-    /// </summary>
-    /// <param name="item"></param>
-    /// <returns></returns>
-    /// <remarks>
-    /// <para>If the feed doesn't provide a GUID, or a link, and
-    /// changes the description, then the article will be
-    /// duplicated.</para>
-    /// </remarks>
-    private string GetUniqueIdFromRss(XElement item, Action<Action> dispatch, Action<Exception> error)
+    private XElement GetMandatoryElement(XElement container, XName name,
+                                         Action<Exception> error)
     {
-      string unique = null;
-      // If possible use <guid> for unique ID
-      XElement guid = item.Element("guid");
-      if (guid != null) {
-        unique = (string)guid;
+      XElement element = container.Element(name);
+      if (element == null) {
+        error(new SubscriptionParsingException(string.Format("Missing <{0}> element", name))
+        {
+          Subscription = this,
+        });
       }
-      // If <guid> didn't provide a unique ID, try <link>
-      if (unique == null) {
-        XElement link = item.Element("link");
-        if (link != null) {
-          unique = (string)link;
-        }
-      }
-      // If we still don't have a unique ID use <description>
-      // (one of <link> and <description> are required in RSS)
-      if (unique == null) {
-        unique = (string)GetMandatoryElement(item, "description", dispatch, error);
-      }
-      // Convert unique string to something managable.  We include
-      // subscription ID to ensure global uniqueness.
-      return Convert.ToBase64String(HashFunction.ComputeHash(Encoding.UTF8.GetBytes(Identity + " " + unique)));
+      return element;
+    }
+
+    private string HashId(string id)
+    {
+      return Convert.ToBase64String(HashFunction.ComputeHash(Encoding.UTF8.GetBytes(Identity + " " + id)));
     }
 
     #endregion

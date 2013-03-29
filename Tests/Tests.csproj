@@ -58,6 +58,7 @@
     <Compile Include="TestRssSubscription.cs" />
     <Compile Include="TestSubscriptionList.cs" />
     <Compile Include="TestRFC3339Date.cs" />
+    <Compile Include="TestAtomSubscription.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ReaderLib\ReaderLib.csproj">
