@@ -184,11 +184,7 @@ namespace ReaderLib
         case "feed":
           UpdateFromAtom(root, dispatch, error);
           break;
-        case "RDF":
-          UpdateFromRdf(root, dispatch, error);
-          break;
         default:
-          // TODO RDF
           throw new SubscriptionParsingException(string.Format("Unrecognized web feed type: {0}", root.Name.LocalName))
           {
             Subscription = this

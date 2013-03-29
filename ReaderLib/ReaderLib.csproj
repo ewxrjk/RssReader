@@ -62,7 +62,6 @@
     <Compile Include="Tools.cs" />
     <Compile Include="UniquelyIdentifiable.cs" />
     <Compile Include="UserVisibleAttribute.cs" />
-    <Compile Include="WebSubscription.Rdf.cs" />
     <Compile Include="WebSubscription.Rss.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
