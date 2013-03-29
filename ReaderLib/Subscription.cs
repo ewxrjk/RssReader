@@ -13,7 +13,7 @@ namespace ReaderLib
   /// <summary>
   /// A subscription of some kind
   /// </summary>
-  [XmlInclude(typeof(RssSubscription))]
+  [XmlInclude(typeof(WebSubscription))]
   public abstract class Subscription: UniquelyIdentifiable, INotifyPropertyChanged
   {
     public Subscription()

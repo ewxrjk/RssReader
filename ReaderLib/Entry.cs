@@ -15,7 +15,7 @@ namespace ReaderLib
   /// <remarks>
   /// <para>Subclassed by each subscription type.</para>
   /// </remarks>
-  [XmlInclude(typeof(RssEntryData))]
+  [XmlInclude(typeof(WebEntry))]
   public class Entry : EntryBase
   {
 

@@ -15,7 +15,7 @@ namespace Tests
     public void TestRssFeedDetails()
     {
       SubscriptionList sl = new SubscriptionList();
-      RssSubscription sub = new RssSubscription() { Parent = sl };
+      WebSubscription sub = new WebSubscription() { Parent = sl };
       sub.Load();
       Dictionary<string, int> propertyChanges = DetectSubscriptionChanges(sub);
       using (FileStream fs = new FileStream("rss2sample.xml", FileMode.Open)) {
@@ -33,7 +33,7 @@ namespace Tests
     public void TestRssFeedItems()
     {
       SubscriptionList sl = new SubscriptionList();
-      RssSubscription sub = new RssSubscription() { Parent = sl };
+      WebSubscription sub = new WebSubscription() { Parent = sl };
       sub.Load();
       Dictionary<string, int> propertyChanges = DetectSubscriptionChanges(sub);
       using (FileStream fs = new FileStream("rss2sample.xml", FileMode.Open)) {
@@ -46,7 +46,7 @@ namespace Tests
     public void TestRssFeedSerialization()
     {
       SubscriptionList sl = new SubscriptionList();
-      RssSubscription sub = new RssSubscription() { Parent = sl };
+      WebSubscription sub = new WebSubscription() { Parent = sl };
       sub.Load();
       using (FileStream fs = new FileStream("rss2sample.xml", FileMode.Open)) {
         sub.UpdateFromStreamReader(new StreamReader(fs), SynchronousDispatch, RejectError);
@@ -58,7 +58,7 @@ namespace Tests
       }
       sub.Save("data.xml");
 
-      RssSubscription sub2 = new RssSubscription() { Parent = sl };
+      WebSubscription sub2 = new WebSubscription() { Parent = sl };
       Dictionary<string, int> propertyChanges = DetectSubscriptionChanges(sub2);
       sub2.Load("data.xml");
       Assert.AreEqual(1, propertyChanges["Entries"]);
@@ -73,11 +73,11 @@ namespace Tests
       }
     }
 
-    public void ValidateRss(RssSubscription sub)
+    public void ValidateRss(WebSubscription sub)
     {
       int[] found = new int[4] { 0, 0, 0, 0 };
       foreach (KeyValuePair<string, Entry> kvp in sub.Entries) {
-        RssEntryData data = sub.Entries[kvp.Key] as RssEntryData;
+        WebEntry data = sub.Entries[kvp.Key] as WebEntry;
         Assert.AreNotEqual(null, data);
         Assert.AreEqual(true, data.Serial >= 0);
         Assert.AreEqual(true, data.Serial < 4);

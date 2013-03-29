@@ -15,9 +15,9 @@ namespace ReaderLib
   /// <summary>
   /// An RSS subscription
   /// </summary>
-  public class RssSubscription : Subscription
+  public class WebSubscription : Subscription
   {
-    public RssSubscription()
+    public WebSubscription()
     {
       Description = null;
       URI = null;
@@ -216,13 +216,13 @@ namespace ReaderLib
         foreach (XElement item in items) {
           string unique = GetUniqueIdFromRss(item, dispatch, error);
           // Retrieve or create entry
-          RssEntryData data = null;
+          WebEntry data = null;
           bool newEntry = false;
           // Find out what we know
-          data = (RssEntryData)_Entries.Entries.GetValueOrDefault(unique, null);
+          data = (WebEntry)_Entries.Entries.GetValueOrDefault(unique, null);
           if (data == null) {
             // A new entry.
-            data = new RssEntryData()
+            data = new WebEntry()
             {
               Identity = unique,
               Serial = this.NextSerial++,

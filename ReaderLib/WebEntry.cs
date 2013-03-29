@@ -9,7 +9,7 @@ using System.ComponentModel;
 
 namespace ReaderLib
 {
-  public class RssEntryData : Entry, INotifyPropertyChanged
+  public class WebEntry : Entry, INotifyPropertyChanged
   {
     #region Public Properties
 

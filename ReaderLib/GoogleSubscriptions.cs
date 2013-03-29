@@ -42,7 +42,7 @@ namespace ReaderLib
             if(uri == null) {
               continue;
             }
-            RssSubscription r = new RssSubscription() {
+            WebSubscription r = new WebSubscription() {
               URI = (string)uri,
             };
             if(publicUri != null) {

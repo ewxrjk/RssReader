@@ -16,11 +16,11 @@ namespace Tests
     {
       {
         SubscriptionList sl = new SubscriptionList();
-        sl.Subscriptions.Add(new RssSubscription()
+        sl.Subscriptions.Add(new WebSubscription()
         {
           URI = "http://www.example.com/rss"
         });
-        sl.Subscriptions.Add(new RssSubscription()
+        sl.Subscriptions.Add(new WebSubscription()
         {
           URI = "http://www.example.com/atom"
         });
@@ -28,10 +28,10 @@ namespace Tests
       }
       SubscriptionList sl2 = SubscriptionList.Load("subscriptions.xml");
       Assert.AreEqual(2, sl2.Subscriptions.Count);
-      Assert.AreNotEqual(null, sl2.Subscriptions[0] as RssSubscription);
-      Assert.AreEqual("http://www.example.com/rss", ((RssSubscription)sl2.Subscriptions[0]).URI);
-      Assert.AreNotEqual(null, sl2.Subscriptions[1] as RssSubscription);
-      Assert.AreEqual("http://www.example.com/atom", ((RssSubscription)sl2.Subscriptions[1]).URI);
+      Assert.AreNotEqual(null, sl2.Subscriptions[0] as WebSubscription);
+      Assert.AreEqual("http://www.example.com/rss", ((WebSubscription)sl2.Subscriptions[0]).URI);
+      Assert.AreNotEqual(null, sl2.Subscriptions[1] as WebSubscription);
+      Assert.AreEqual("http://www.example.com/atom", ((WebSubscription)sl2.Subscriptions[1]).URI);
     }
 
     [TestMethod]
@@ -43,7 +43,7 @@ namespace Tests
       {
         ++changes;
       };
-      sl.Add(new RssSubscription()
+      sl.Add(new WebSubscription()
       {
         URI = "http://www.example.com/rss"
       });
