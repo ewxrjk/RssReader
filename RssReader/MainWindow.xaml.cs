@@ -213,6 +213,7 @@ namespace RssReader
           if (evm != null) {
             evm.PropertyChanged += EntryPropertyChanged;
             expander.Content = evm.Rendered(EntriesScrollViewer);
+            evm.Read = true;
           }
         }
       }
