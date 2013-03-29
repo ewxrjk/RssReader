@@ -69,6 +69,7 @@ namespace ReaderLib
     /// <param name="subscription"></param>
     public void Add(Subscription subscription)
     {
+      subscription.Parent = this;
       subscription.PropertyChanged += this.ChildPropertyChanged;
       _Subscriptions.Add(subscription);
       Dirty = true;
