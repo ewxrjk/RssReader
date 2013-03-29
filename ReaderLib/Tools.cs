@@ -218,7 +218,7 @@ namespace ReaderLib
 
 
     // [day,] DD MONTH [YY]YY HH:MM:SS ZONE
-    static Regex DateRegex = new Regex(@"^\s*(?:\w+,\s*)?(\d+)\s+(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)$",
+    static Regex RFC822DateRegex = new Regex(@"^\s*(?:\w+,\s*)?(\d+)\s+(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)$",
       RegexOptions.IgnoreCase|RegexOptions.Compiled);
 
     /// <summary>
@@ -228,7 +228,7 @@ namespace ReaderLib
     /// <returns></returns>
     static public DateTime RFC822Date(string s)
     {
-      Match m = DateRegex.Match(s);
+      Match m = RFC822DateRegex.Match(s);
       if (m.Success) {
         int day = int.Parse(m.Groups[1].Value);
         int month = Months[m.Groups[2].Value.ToLowerInvariant()];
@@ -260,6 +260,44 @@ namespace ReaderLib
       }
       else {
         throw new Exception(string.Format("invalid RFC822 date {0}", s));
+      }
+    }
+
+    static Regex RFC3339DateRegex = new Regex(
+      @"(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)(\.\d+)?(Z|(\+|-)(\d+):(\d+))",
+      RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    static public DateTime RFC3339Date(string s)
+    {
+      Match m = RFC3339DateRegex.Match(s);
+      if (m.Success) {
+        int year = int.Parse(m.Groups[1].Value);
+        int month = int.Parse(m.Groups[2].Value);
+        int day = int.Parse(m.Groups[3].Value);
+        int hour = int.Parse(m.Groups[4].Value);
+        int minute = int.Parse(m.Groups[5].Value);
+        int second = int.Parse(m.Groups[6].Value);
+        if (second > 59) { // DateTime won't accept leap seconds, so we bodge them...
+          second = 59;
+        }
+        int ms = m.Groups[7].Success ? (int)Math.Floor(double.Parse(m.Groups[7].Value) * 1000) : 0;
+        int offset;
+        if (m.Groups[8].Value == "Z") {
+          offset = 0;
+        }
+        else {
+          int zoneHours = int.Parse(m.Groups[10].Value);
+          int zoneMinutes = int.Parse(m.Groups[11].Value);
+          offset = 60 * (60 * zoneHours + zoneMinutes);
+          if (m.Groups[9].Value == "-") {
+            offset = -offset;
+          }
+        }
+        DateTime when = new DateTime(year, month, day, hour, minute, second, ms, DateTimeKind.Utc);
+        return when.AddSeconds(-offset);
+      }
+      else {
+        throw new Exception(string.Format("invalid RFC3339 date {0}", s));
       }
     }
 
