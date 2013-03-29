@@ -232,6 +232,7 @@ namespace RssReader
               evm.PropertyChanged -= EntryPropertyChanged;
               expander.Content = null;
             }
+            return;
           }
         }
       }
