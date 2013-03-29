@@ -206,15 +206,32 @@ namespace RssReader
       // We only render the content when the user wants to read it
       // - rendering all the content for an entire feed up front is
       // much too expensive.
-
-      // TODO if content changes while expanded, rewrite it;
-      // if content changes while collapsed, just throw rendered form away.
       Expander expander = (sender as Expander);
       if (expander != null) {
         if (expander.Content == null) {
           EntryViewModel evm = expander.Tag as EntryViewModel;
           if (evm != null) {
+            evm.PropertyChanged += EntryPropertyChanged;
             expander.Content = RenderHTML.Render(evm.HtmlDescription, EntriesScrollViewer);
+          }
+        }
+      }
+    }
+
+    private void EntryPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+      if (e.PropertyName == "HtmlDescription") {
+        foreach (var item in EntriesWidget.Items) {
+          Expander expander = item as Expander;
+          if (expander != null && expander.Tag == this) {
+            EntryViewModel evm = expander.Tag as EntryViewModel;
+            if (expander.IsExpanded) {
+              expander.Content = RenderHTML.Render(evm.HtmlDescription, EntriesScrollViewer);
+            }
+            else {
+              evm.PropertyChanged -= EntryPropertyChanged;
+              expander.Content = null;
+            }
           }
         }
       }

@@ -26,7 +26,7 @@ namespace RssReader
           OnPropertyChanged(e.PropertyName);
           break;
         case "Description":
-          OnPropertyChanged("HTML");
+          OnPropertyChanged("HtmlDescription");
           OnPropertyChanged(e.PropertyName);
           break;
         case "Read":
