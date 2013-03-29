@@ -63,7 +63,7 @@ namespace RssReader
             children.Add(RenderParagraph(e, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null, scrollviewer));
             break;
           case "pre":
-            children.Add(RenderParagraph(e, 1, FontWeights.Normal, Monospace, scrollviewer));
+            children.Add(RenderParagraph(e, 1, FontWeights.Normal, Monospace, scrollviewer, false));
             break;
           case "table":
             children.Add(RenderTable(e, scrollviewer));
@@ -219,7 +219,8 @@ namespace RssReader
                                       double fontScale,
                                       FontWeight fontWeight,
                                       FontFamily fontFamily,
-                                      ScrollViewer scrollviewer)
+                                      ScrollViewer scrollviewer,
+                                      bool collapseSpace = true)
     {
       TextBlock t = new TextBlock()
       {
@@ -231,15 +232,17 @@ namespace RssReader
       {
         Container = scrollviewer
       };
-      t.SetBinding(TextBlock.MaxWidthProperty,
-                   new Binding()
-                   {
-                     Source = pst,
-                     Path = new PropertyPath("Width")
-                   });
+      if (collapseSpace) {
+        t.SetBinding(TextBlock.MaxWidthProperty,
+                     new Binding()
+                     {
+                       Source = pst,
+                       Path = new PropertyPath("Width")
+                     });
+      }
       LastCharacter = ' ';
       foreach (HTML.Node node in e.Contents) {
-        Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily, pst);
+        Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily, pst, collapseSpace);
         if (i != null) {
           t.Inlines.Add(i);
         }
@@ -249,7 +252,7 @@ namespace RssReader
 
     private char LastCharacter = ' ';
 
-    private Inline RenderInlines(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily, ParagraphSizeTracker pst)
+    private Inline RenderInlines(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily, ParagraphSizeTracker pst, bool collapseSpace)
     {
       HTML.Element e = n as HTML.Element;
       if (e != null) {
@@ -278,7 +281,7 @@ namespace RssReader
         }
         if (newInline is Span) {
           foreach (HTML.Node node in e.Contents) {
-            Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily, pst);
+            Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily, pst, collapseSpace);
             if (i != null) {
               (newInline as Span).Inlines.Add(i);
             }
@@ -289,38 +292,70 @@ namespace RssReader
       }
       else {
         //Console.WriteLine("text: [{0}]", ((HTML.Cdata)n).Content);
-        StringBuilder sb = new StringBuilder();
-        foreach (char c in ((HTML.Cdata)n).Content) {
-          char ch;
-          switch (c) {
-            case ' ':
-            case '\t':
-            case '\n':
-            case '\r':
-              if (LastCharacter == ' ') {
-                continue;
-              }
-              ch = ' ';
-              break;
-            default:
-              ch = c;
-              break;
+        Inline i;
+        if (collapseSpace) {
+          StringBuilder sb = new StringBuilder();
+          foreach (char c in ((HTML.Cdata)n).Content) {
+            char ch;
+            switch (c) {
+              case ' ':
+              case '\t':
+              case '\n':
+              case '\r':
+                if (LastCharacter == ' ') {
+                  continue;
+                }
+                ch = ' ';
+                break;
+              default:
+                ch = c;
+                break;
+            }
+            sb.Append(ch);
+            LastCharacter = ch;
           }
-          sb.Append(ch);
-          LastCharacter = ch;
-        }
-        if (sb.Length > 0) {
-          Run r = new Run(sb.ToString());
-          r.FontSize *= fontScale;
-          if (fontFamily != null) {
-            r.FontFamily = fontFamily;
+          string s = sb.ToString();
+          if (s.Length > 0) {
+            i = new Run(s);
           }
-          r.FontWeight = fontWeight;
-          return r;
+          else {
+            return null;
+          }
         }
         else {
-          return null;
+          string s = ((HTML.Cdata)n).Content;
+          Span span = new Span();
+          i = span;
+          StringBuilder sb = null;
+          foreach (char c in ((HTML.Cdata)n).Content) {
+            switch (c) {
+              case '\n':
+                if (sb != null) {
+                  if (sb.Length > 0) {
+                    span.Inlines.Add(new Run(sb.ToString()));
+                  }
+                  sb = null;
+                }
+                span.Inlines.Add(new LineBreak());
+                break;
+              default:
+                if (sb == null) {
+                  sb = new StringBuilder();
+                }
+                sb.Append(c);
+                break;
+            }
+          }
+          if (sb != null && sb.Length > 0) {
+            span.Inlines.Add(new Run(sb.ToString()));
+          }
         }
+        i.FontSize *= fontScale;
+        if (fontFamily != null) {
+          i.FontFamily = fontFamily;
+        }
+        i.FontWeight = fontWeight;
+        return i;
       }
     }
 
