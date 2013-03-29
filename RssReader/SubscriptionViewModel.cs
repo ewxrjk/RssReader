@@ -84,6 +84,8 @@ namespace RssReader
     private void ModelEntryAdded(Entry entry)
     {
       Entries.Insert(0, CreateEntryViewModel(entry));
+      OnPropertyChanged("UnreadEntries");
+      OnPropertyChanged("TitleWeight");
     }
 
     private void ModelPropertyChanged(object sender, PropertyChangedEventArgs e)
