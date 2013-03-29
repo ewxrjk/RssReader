@@ -8,7 +8,7 @@ namespace Tests
   public class TestRFC822Date
   {
     [TestMethod]
-    public void TestUtcDates()
+    public void Test822UtcDates()
     {
       Assert.AreEqual(new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                       Tools.RFC822Date("1 Jan 90 00:00:00 GMT"));
@@ -19,7 +19,7 @@ namespace Tests
     }
 
     [TestMethod]
-    public void TestBstDates()
+    public void Test822BstDates()
     {
       Assert.AreEqual(new DateTime(1977, 8, 1, 23, 0, 0, DateTimeKind.Utc),
                 Tools.RFC822Date("Tue, 02 Aug 1977 00:00:00 +0100"));
