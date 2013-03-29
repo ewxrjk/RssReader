@@ -16,18 +16,19 @@ using System.Collections.ObjectModel;
 
 namespace RssReader
 {
-  static public class RenderHTML
+  public class RenderHTML
   {
     static readonly FontFamily Monospace = new FontFamily("Global Monospace");
 
     static public FrameworkElement Render(HTML.Document document,
                                           ScrollViewer scrollviewer)
     {
-      return RenderBlocks(document.HTML.Follow("body"), scrollviewer);
+      RenderHTML renderer = new RenderHTML();
+      return renderer.RenderBlocks(document.HTML.Follow("body"), scrollviewer);
     }
 
-    static private FrameworkElement RenderBlocks(HTML.Element root,
-                                                 ScrollViewer scrollviewer)
+    private FrameworkElement RenderBlocks(HTML.Element root,
+                                          ScrollViewer scrollviewer)
     {
       /*
        * TextBlock container = new TextBlock()
@@ -112,7 +113,7 @@ namespace RssReader
       return true;
     }
 
-    static UIElement RenderTable(HTML.Element e, ScrollViewer scrollviewer)
+    UIElement RenderTable(HTML.Element e, ScrollViewer scrollviewer)
     {
       Grid g = new Grid();
       if (scrollviewer != null) {
@@ -184,7 +185,7 @@ namespace RssReader
       return 1;
     }
 
-    static private UIElement RenderList(HTML.Element e, Func<int, string> makeBullet, ScrollViewer scrollviewer)
+    private UIElement RenderList(HTML.Element e, Func<int, string> makeBullet, ScrollViewer scrollviewer)
     {
       Grid g = new Grid();
       if (scrollviewer != null) {
@@ -220,11 +221,11 @@ namespace RssReader
       return g;
     }
 
-    static private UIElement RenderParagraph(HTML.Element e,
-                                             double fontScale,
-                                             FontWeight fontWeight,
-                                             FontFamily fontFamily,
-                                             ScrollViewer scrollviewer)
+    private UIElement RenderParagraph(HTML.Element e,
+                                      double fontScale,
+                                      FontWeight fontWeight,
+                                      FontFamily fontFamily,
+                                      ScrollViewer scrollviewer)
     {
       TextBlock t = new TextBlock()
       {
@@ -241,6 +242,7 @@ namespace RssReader
                      Source = pst,
                      Path = new PropertyPath("Width")
                    });
+      LastCharacter = ' ';
       foreach (HTML.Node node in e.Contents) {
         Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily, pst);
         if (i != null) {
@@ -250,7 +252,9 @@ namespace RssReader
       return t;
     }
 
-    static private Inline RenderInlines(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily, ParagraphSizeTracker pst)
+    private char LastCharacter = ' ';
+
+    private Inline RenderInlines(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily, ParagraphSizeTracker pst)
     {
       HTML.Element e = n as HTML.Element;
       if (e != null) {
@@ -290,17 +294,42 @@ namespace RssReader
       }
       else {
         //Console.WriteLine("text: [{0}]", ((HTML.Cdata)n).Content);
-        Run r = new Run(((HTML.Cdata)n).Content);
-        r.FontSize *= fontScale;
-        if (fontFamily != null) {
-          r.FontFamily = fontFamily;
+        StringBuilder sb = new StringBuilder();
+        foreach (char c in ((HTML.Cdata)n).Content) {
+          char ch;
+          switch (c) {
+            case ' ':
+            case '\t':
+            case '\n':
+            case '\r':
+              if (LastCharacter == ' ') {
+                continue;
+              }
+              ch = ' ';
+              break;
+            default:
+              ch = c;
+              break;
+          }
+          sb.Append(ch);
+          LastCharacter = ch;
         }
-        r.FontWeight = fontWeight;
-        return r;
+        if (sb.Length > 0) {
+          Run r = new Run(sb.ToString());
+          r.FontSize *= fontScale;
+          if (fontFamily != null) {
+            r.FontFamily = fontFamily;
+          }
+          r.FontWeight = fontWeight;
+          return r;
+        }
+        else {
+          return null;
+        }
       }
     }
 
-    static private Inline RenderHyperlink(HTML.Element e)
+    private Inline RenderHyperlink(HTML.Element e)
     {
       Hyperlink h = new Hyperlink();
       if (e.Attributes.ContainsKey("href")) {
@@ -320,7 +349,7 @@ namespace RssReader
       e.Handled = true;
     }
 
-    static private Inline RenderImage(HTML.Element e, ParagraphSizeTracker pst)
+    private Inline RenderImage(HTML.Element e, ParagraphSizeTracker pst)
     {
       Uri ImageURI;
       if (e.Attributes.ContainsKey("src")
