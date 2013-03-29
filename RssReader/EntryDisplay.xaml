@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="RssReader.EntryDisplay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d">
+  <StackPanel Name="Panel">
+    <TextBlock>
+      <Hyperlink NavigateUri="{Binding Path=URI, Mode=OneWay}" FontFamily="Global Sans" FontWeight="Bold" FontSize="16" RequestNavigate="RequestedNavigate">
+        <Run Text="{Binding Path=Date, Mode=OneWay}"/>
+        <Run Text="{Binding Path=Title, Mode=OneWay}"/>
+      </Hyperlink>
+    </TextBlock>
+  </StackPanel>
+</UserControl>

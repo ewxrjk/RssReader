@@ -53,12 +53,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EntryDisplay.xaml.cs">
+      <DependentUpon>EntryDisplay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EntryViewModel.cs" />
     <Compile Include="ErrorViewModel.cs" />
     <Compile Include="RenderHTML.cs" />
     <Compile Include="SubscriptionListViewModel.cs" />
     <Compile Include="SubscriptionViewModel.cs" />
     <Page Include="About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EntryDisplay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

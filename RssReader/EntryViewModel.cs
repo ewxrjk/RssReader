@@ -120,77 +120,16 @@ namespace RssReader
 
     #endregion
 
-    static readonly FontFamily HeadingFontFamily = new FontFamily("Global Sans Serif");
-
-    private Inline HeadingDate()
-    {
-      Run r = new Run();
-      r.SetBinding(Run.TextProperty, new Binding()
-      {
-        Source = this,
-        Path = new PropertyPath("Date"),
-        Mode = BindingMode.OneWay,
-      });
-      return r;
-
-    }
-
-    private Inline HeadingTitle()
-    {
-      Run r = new Run();
-      r.SetBinding(Run.TextProperty, new Binding()
-      {
-        Source = this,
-        Path = new PropertyPath("Title"),
-        Mode = BindingMode.OneWay,
-      });
-      return r;
-    }
-
-    private Hyperlink HeadingHyperlink()
-    {
-      // TODO ugh.  can't we use xaml for this?
-      Hyperlink l = new Hyperlink()
-      {
-        FontFamily = HeadingFontFamily,
-        FontWeight = FontWeights.Bold,
-      };
-      l.FontSize *= 1.5;
-      l.SetBinding(Hyperlink.NavigateUriProperty, new Binding()
-      {
-        Source = this,
-        Path = new PropertyPath("URI"),
-        Mode = BindingMode.OneWay,
-      });
-      l.SetBinding(Hyperlink.ToolTipProperty, new Binding()
-      {
-        Source = this,
-        Path = new PropertyPath("URI"),
-        Mode = BindingMode.OneWay,
-      });
-      l.RequestNavigate += RequestedNavigate;
-      l.Inlines.Add(HeadingDate());
-      l.Inlines.Add(HeadingTitle());
-      return l;
-    }
-
     public FrameworkElement Rendered(ScrollViewer scrollViewer)
     {
-      StackPanel sp = new StackPanel();
-      TextBlock header = new TextBlock();
-      header.Inlines.Add(HeadingHyperlink());
-      sp.Children.Add(header);
-      sp.Children.Add(RenderHTML.Render(HtmlDescription, scrollViewer));
+      EntryDisplay sp = new EntryDisplay()
+      {
+        DataContext = this
+      };
+      sp.Panel.Children.Add(RenderHTML.Render(HtmlDescription, scrollViewer));
       return sp;
     }
     
-    // TODO some duplication here...
-    private void RequestedNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
-    {
-      System.Diagnostics.Process.Start(e.Uri.ToString());
-      e.Handled = true;
-    }
-
     #region INotifyPropertyChanged
 
     public event PropertyChangedEventHandler PropertyChanged;
