@@ -331,26 +331,23 @@ namespace RssReader
         bitmapImage.UriSource = ImageURI;
         bitmapImage.EndInit();
         image.Source = bitmapImage;
+        if (ImageSizeCache.ContainsKey(ImageURI)) {
+          Tuple<int, int> size = ImageSizeCache[ImageURI];
+          image.Width = size.Item1;
+          image.Height = size.Item2;
+        }
         // This hack forces image size to match pixel size,
         // which undermines WPF's preference for honoring the
         // embedded DPI value which leads to upscaled and
         // mildly blurry images where that doesn't match
         // the local display.  Very high resolution displays
         // might need another approach.
-        //
-        // It seems to be necessary to have Source=image and
-        // use a two-component path, rather than having
-        // Source=bitmapImage.  TODO understand why.
-        image.SetBinding(Image.WidthProperty, new Binding()
+        bitmapImage.DownloadCompleted += (s, ee) =>
         {
-          Path = new PropertyPath("Source.PixelWidth"),
-          Source = image,
-        });
-        image.SetBinding(Image.HeightProperty, new Binding()
-        {
-          Path = new PropertyPath("Source.PixelHeight"),
-          Source = image,
-        });
+          ImageSizeCache[ImageURI] = new Tuple<int, int>(bitmapImage.PixelWidth, bitmapImage.PixelHeight);
+          image.Width = bitmapImage.PixelWidth;
+          image.Height = bitmapImage.PixelHeight;
+        };
         // Communicate image size info back up to the container
         if (pst != null) {
           pst.Add(image);
@@ -369,6 +366,8 @@ namespace RssReader
         return null;
       }
     }
+
+    static private Dictionary<Uri, Tuple<int, int>> ImageSizeCache = new Dictionary<Uri, Tuple<int, int>>();
 
     private class ParagraphSizeTracker : INotifyPropertyChanged
     {
