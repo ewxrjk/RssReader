@@ -212,7 +212,7 @@ namespace RssReader
           EntryViewModel evm = expander.Tag as EntryViewModel;
           if (evm != null) {
             evm.PropertyChanged += EntryPropertyChanged;
-            expander.Content = RenderHTML.Render(evm.HtmlDescription, EntriesScrollViewer);
+            expander.Content = evm.Rendered(EntriesScrollViewer);
           }
         }
       }
@@ -226,7 +226,7 @@ namespace RssReader
           if (expander != null && expander.Tag == this) {
             EntryViewModel evm = expander.Tag as EntryViewModel;
             if (expander.IsExpanded) {
-              expander.Content = RenderHTML.Render(evm.HtmlDescription, EntriesScrollViewer);
+              expander.Content = evm.Rendered(EntriesScrollViewer);
             }
             else {
               evm.PropertyChanged -= EntryPropertyChanged;
