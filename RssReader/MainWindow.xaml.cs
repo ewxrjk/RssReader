@@ -201,6 +201,8 @@ namespace RssReader
 
     #endregion
 
+    #region Entry Expansion
+
     private void EntryExpanded(object sender, RoutedEventArgs e)
     {
       // We only render the content when the user wants to read it
@@ -239,6 +241,60 @@ namespace RssReader
       }
     }
 
+    #endregion
+
+    #region Entry Context Menu
+
+    private void EntryContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+      Expander expander = sender as Expander;
+      if (expander != null) {
+        ContextMenu menu = expander.ContextMenu;
+        menu.DataContext = expander.Tag;
+      }
+    }
+
+    private void ReadEntryOnline(object sender, RoutedEventArgs e)
+    {
+      EntryViewModel evm = GetEntryFromMenuItem(sender);
+      if (evm != null) {
+        System.Diagnostics.Process.Start(evm.URI.ToString());
+      }
+    }
+
+    private void CopyEntryUri(object sender, RoutedEventArgs e)
+    {
+      EntryViewModel evm = GetEntryFromMenuItem(sender);
+      if (evm != null) {
+        Clipboard.Copy(evm.URI.ToString());
+      }
+    }
+
+    private void MarkEntryRead(object sender, RoutedEventArgs e)
+    {
+      EntryViewModel evm = GetEntryFromMenuItem(sender);
+      if (evm != null) {
+        Console.WriteLine("marking as read: {0}", evm.Title);
+        evm.Read = true;
+      }
+    }
+
+    private void MarkEntryUnread(object sender, RoutedEventArgs e)
+    {
+      EntryViewModel evm = GetEntryFromMenuItem(sender);
+      if (evm != null) {
+        Console.WriteLine("marking as unread: {0}", evm.Title);
+        evm.Read = false;
+      }
+    }
+
+    private static EntryViewModel GetEntryFromMenuItem(object sender)
+    {
+      MenuItem menuItem = sender as MenuItem;
+      return menuItem != null ? menuItem.DataContext as EntryViewModel : null;
+    }
+
+    #endregion
 
   }
 }

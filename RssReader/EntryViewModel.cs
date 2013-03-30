@@ -7,6 +7,7 @@ using HTML = ReaderLib.HTML;
 using System.Windows.Documents;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Runtime.CompilerServices;
 
 namespace RssReader
 {
@@ -37,6 +38,7 @@ namespace RssReader
           break;
         case "Read":
           OnPropertyChanged("TitleWeight");
+          OnPropertyChanged("Unread");
           OnPropertyChanged(e.PropertyName);
           break;
       }
@@ -77,6 +79,18 @@ namespace RssReader
       set
       {
         _Entry.Read = value;
+      }
+    }
+
+    public bool Unread
+    {
+      get
+      {
+        return !_Entry.Read;
+      }
+      set
+      {
+        _Entry.Read = !value;
       }
     }
 
@@ -134,7 +148,7 @@ namespace RssReader
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    public void OnPropertyChanged(string propertyName)
+    public void OnPropertyChanged([CallerMemberName]string propertyName = "")
     {
       PropertyChangedEventHandler handler = PropertyChanged;
       if (handler != null) {

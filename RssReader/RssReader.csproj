@@ -53,6 +53,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ClipboardHelper.cs" />
     <Compile Include="EntryDisplay.xaml.cs">
       <DependentUpon>EntryDisplay.xaml</DependentUpon>
     </Compile>

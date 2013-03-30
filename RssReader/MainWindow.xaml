@@ -6,6 +6,14 @@
         Height="480"
         Width="640"
         Closing="Window_Closing">
+  <Window.Resources>
+    <ContextMenu x:Key="EntryMenu">
+      <MenuItem Header="Read Online" Click="ReadEntryOnline"/>
+      <MenuItem Header="Copy URI" Click="CopyEntryUri"/>
+      <MenuItem Header="Mark as read" IsEnabled="{Binding Unread}" Click="MarkEntryRead"/>
+      <MenuItem Header="Mark unread" IsEnabled="{Binding Read}" Click="MarkEntryUnread"/>
+    </ContextMenu>
+  </Window.Resources>
   <Window.CommandBindings>
     <CommandBinding Command="ApplicationCommands.Close" Executed="CloseExecuted"/>
     <CommandBinding Command="{x:Static local:MainWindow.SubscribeCommand}" Executed="SubscribeExecuted"/>
@@ -66,7 +74,7 @@
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate>
-              <Expander Expanded="EntryExpanded" Tag="{Binding}">
+              <Expander Expanded="EntryExpanded" Tag="{Binding}" ContextMenu="{StaticResource EntryMenu}" ContextMenuOpening="EntryContextMenuOpening">
                 <Expander.Header>
                   <TextBlock Text="{Binding Title}" FontWeight="{Binding TitleWeight}"/>
                 </Expander.Header>
