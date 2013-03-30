@@ -134,16 +134,6 @@ namespace RssReader
 
     #endregion
 
-    public FrameworkElement Rendered(ScrollViewer scrollViewer)
-    {
-      EntryDisplay sp = new EntryDisplay()
-      {
-        DataContext = this
-      };
-      sp.Panel.Children.Add(RenderHTML.Render(HtmlDescription, scrollViewer));
-      return sp;
-    }
-    
     #region INotifyPropertyChanged
 
     public event PropertyChangedEventHandler PropertyChanged;

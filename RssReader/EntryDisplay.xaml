@@ -4,12 +4,27 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d">
-  <StackPanel Name="Panel">
-    <TextBlock>
-      <Hyperlink NavigateUri="{Binding Path=URI, Mode=OneWay}" FontFamily="Global Sans" FontWeight="Bold" FontSize="16" RequestNavigate="RequestedNavigate">
-        <Run Text="{Binding Path=Date, Mode=OneWay}"/>
-        <Run Text="{Binding Path=Title, Mode=OneWay}"/>
-      </Hyperlink>
-    </TextBlock>
-  </StackPanel>
+  <UserControl.Resources>
+    <ContextMenu x:Key="EntryMenu">
+      <MenuItem Header="Read Online" Click="ReadEntryOnline"/>
+      <MenuItem Header="Copy URI" Click="CopyEntryUri"/>
+      <MenuItem Header="Mark as read" IsEnabled="{Binding Unread}" Click="MarkEntryRead"/>
+      <MenuItem Header="Mark unread" IsEnabled="{Binding Read}" Click="MarkEntryUnread"/>
+    </ContextMenu>
+  </UserControl.Resources>
+  <Expander Expanded="EntryExpanded" Tag="{Binding}" ContextMenu="{StaticResource EntryMenu}" ContextMenuOpening="EntryContextMenuOpening" Name="Expander">
+    <Expander.Header>
+      <TextBlock Text="{Binding Title}" FontWeight="{Binding TitleWeight}"/>
+    </Expander.Header>
+    <Expander.Content>
+      <StackPanel Name="Panel">
+        <TextBlock>
+          <Hyperlink NavigateUri="{Binding Path=URI, Mode=OneWay}" FontFamily="Global Sans" FontWeight="Bold" FontSize="16" RequestNavigate="RequestedNavigate">
+            <Run Text="{Binding Path=Date, Mode=OneWay}"/>
+            <Run Text="{Binding Path=Title, Mode=OneWay}"/>
+          </Hyperlink>
+        </TextBlock>
+      </StackPanel>
+    </Expander.Content>
+  </Expander>
 </UserControl>
