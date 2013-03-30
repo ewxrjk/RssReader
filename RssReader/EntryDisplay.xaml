@@ -12,7 +12,7 @@
       <MenuItem Header="Mark unread" IsEnabled="{Binding Read}" Click="MarkEntryUnread"/>
     </ContextMenu>
   </UserControl.Resources>
-  <Expander Expanded="EntryExpanded" Tag="{Binding}" ContextMenu="{StaticResource EntryMenu}" ContextMenuOpening="EntryContextMenuOpening" Name="Expander">
+  <Expander Expanded="EntryExpanded" Tag="{Binding}" ContextMenu="{StaticResource EntryMenu}" Name="Expander">
     <Expander.Header>
       <TextBlock Text="{Binding Title}" FontWeight="{Binding TitleWeight}"/>
     </Expander.Header>

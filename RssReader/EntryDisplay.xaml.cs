@@ -26,6 +26,7 @@ namespace RssReader
       InitializeComponent();
     }
 
+    // TODO this is duplicate a bit...
     private void RequestedNavigate(object sender, RequestNavigateEventArgs e)
     {
       System.Diagnostics.Process.Start(e.Uri.ToString());
@@ -99,15 +100,6 @@ namespace RssReader
     #endregion
 
     #region Entry Context Menu
-
-    private void EntryContextMenuOpening(object sender, ContextMenuEventArgs e)
-    {
-      /*
-      if (Expander != null) {
-        ContextMenu.DataContext = EVM;
-      }
-      */
-    }
 
     private void ReadEntryOnline(object sender, RoutedEventArgs e)
     {
