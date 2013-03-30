@@ -11,6 +11,7 @@
       <MenuItem Header="_Read online" Click="ReadSubscriptionOnline" IsEnabled="{Binding CanReadOnline}" ToolTip="{Binding PublicURI}"/>
       <MenuItem Header="_Mark all read" Click="MarkSubscriptionRead" IsEnabled="{Binding HasUnreadEntries}"/>
       <MenuItem Header="_Edit" Click="EditSubscription"/>
+      <MenuItem Header="_Delete" Click="DeleteSubscription"/>
     </ContextMenu>
   </Window.Resources>
   <Window.CommandBindings>
@@ -26,7 +27,6 @@
       <RowDefinition Height="auto"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="auto"/>
-      <RowDefinition Height="auto"/> <!-- TODO remove -->
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="160"/>

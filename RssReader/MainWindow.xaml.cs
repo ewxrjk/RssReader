@@ -215,7 +215,12 @@ namespace RssReader
 
     private void EditSubscription(object sender, RoutedEventArgs e)
     {
+      // TODO
+    }
 
+    private void DeleteSubscription(object sender, RoutedEventArgs e)
+    {
+      // TODO
     }
 
     #endregion
