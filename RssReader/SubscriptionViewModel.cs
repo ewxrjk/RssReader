@@ -29,7 +29,7 @@ namespace RssReader
       _Subscription.PropertyChanged += ModelPropertyChanged;
     }
 
-    private Subscription _Subscription;
+    public Subscription _Subscription;
 
     private EntryViewModel CreateEntryViewModel(Entry entry)
     {
@@ -42,6 +42,8 @@ namespace RssReader
     /// Entries in this subscription
     /// </summary>
     public ObservableCollection<EntryViewModel> Entries = new ObservableCollection<EntryViewModel>();
+
+    #region Public Properties
 
     public string Title
     {
@@ -81,10 +83,57 @@ namespace RssReader
       }
     }
 
+    public bool CanReadOnline
+    {
+      get
+      {
+        WebSubscription ws = _Subscription as WebSubscription;
+        return ws != null && ws.PublicURI != null;
+      }
+    }
+
+    public bool HasUnreadEntries
+    {
+      get
+      {
+        return UnreadEntries > 0;
+      }
+    }
+
+    public string PublicURI
+    {
+      get
+      {
+        WebSubscription ws = _Subscription as WebSubscription;
+        return ws != null ? ws.PublicURI : null;
+      }
+    }
+
+    #endregion
+
+    #region Commands
+
+    public void ReadOnline()
+    {
+      System.Diagnostics.Process.Start(((WebSubscription)_Subscription).PublicURI.ToString());
+    }
+
+    public void MarkAllEntriesRead()
+    {
+      foreach (EntryViewModel evm in Entries) {
+        evm.Read = true;
+      }
+    }
+
+    #endregion
+
+    #region Notification Handling
+
     private void ModelEntryAdded(Entry entry)
     {
       Entries.Insert(0, CreateEntryViewModel(entry));
       OnPropertyChanged("UnreadEntries");
+      OnPropertyChanged("HasUnreadEntries");
       OnPropertyChanged("TitleWeight");
     }
 
@@ -94,6 +143,10 @@ namespace RssReader
         case "Title":
           OnPropertyChanged(e.PropertyName);
           break;
+        case "PublicURI":
+          OnPropertyChanged(e.PropertyName);
+          OnPropertyChanged("CanReadOnline");
+          break;
       }
     }
 
@@ -101,12 +154,15 @@ namespace RssReader
     {
       switch (e.PropertyName) {
         case "Read":
+          OnPropertyChanged("HasUnreadEntries");
           OnPropertyChanged("UnreadEntries");
           OnPropertyChanged("TitleWeight");
           OnPropertyChanged("TitleTooltip");
           break;
       }
     }
+
+    #endregion
 
     #region INotifyPropertyChanged
 

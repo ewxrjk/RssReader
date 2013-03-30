@@ -201,5 +201,24 @@ namespace RssReader
 
     #endregion
 
+    #region Subscription Context Menu
+
+    private void ReadSubscriptionOnline(object sender, RoutedEventArgs e)
+    {
+      ((SubscriptionViewModel)SubscriptionsWidget.SelectedItem).ReadOnline();
+    }
+
+    private void MarkSubscriptionRead(object sender, RoutedEventArgs e)
+    {
+      ((SubscriptionViewModel)SubscriptionsWidget.SelectedItem).MarkAllEntriesRead();
+    }
+
+    private void EditSubscription(object sender, RoutedEventArgs e)
+    {
+
+    }
+
+    #endregion
+
   }
 }

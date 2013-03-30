@@ -6,6 +6,13 @@
         Height="480"
         Width="640"
         Closing="Window_Closing">
+  <Window.Resources>
+    <ContextMenu x:Key="SubscriptionContextMenu">
+      <MenuItem Header="_Read online" Click="ReadSubscriptionOnline" IsEnabled="{Binding CanReadOnline}" ToolTip="{Binding PublicURI}"/>
+      <MenuItem Header="_Mark all read" Click="MarkSubscriptionRead" IsEnabled="{Binding HasUnreadEntries}"/>
+      <MenuItem Header="_Edit" Click="EditSubscription"/>
+    </ContextMenu>
+  </Window.Resources>
   <Window.CommandBindings>
     <CommandBinding Command="ApplicationCommands.Close" Executed="CloseExecuted"/>
     <CommandBinding Command="{x:Static local:MainWindow.SubscribeCommand}" Executed="SubscribeExecuted"/>
@@ -45,7 +52,7 @@
       <ListBox Name="SubscriptionsWidget" ItemsSource="{Binding Path=Subscriptions.Subscriptions}" SelectionChanged="SelectSubscription">
         <ListBox.ItemTemplate>
           <DataTemplate>
-            <TextBlock Text="{Binding Title}" FontWeight="{Binding TitleWeight}" ToolTip="{Binding TitleTooltip}"/>
+            <TextBlock Text="{Binding Title}" FontWeight="{Binding TitleWeight}" ToolTip="{Binding TitleTooltip}" ContextMenu="{StaticResource SubscriptionContextMenu}"/>
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
