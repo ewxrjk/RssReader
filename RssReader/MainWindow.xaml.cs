@@ -215,7 +215,12 @@ namespace RssReader
 
     private void EditSubscription(object sender, RoutedEventArgs e)
     {
-      // TODO
+      SubscriptionEditor editor = new SubscriptionEditor()
+      {
+        Subscription = ((SubscriptionViewModel)SubscriptionsWidget.SelectedItem).Subscription,
+        Owner = this
+      };
+      editor.ShowDialog();
     }
 
     private void DeleteSubscription(object sender, RoutedEventArgs e)

@@ -17,19 +17,19 @@ namespace RssReader
   /// </summary>
   public class SubscriptionViewModel: INotifyPropertyChanged
   {
-    public SubscriptionViewModel(Subscription subscription)
+    public SubscriptionViewModel(ReaderLib.Subscription subscription)
     {
-      _Subscription = subscription;
-      foreach (Entry entry in from kvp in _Subscription.Entries
+      Subscription = subscription;
+      foreach (Entry entry in from kvp in Subscription.Entries
                               orderby kvp.Value.Serial descending
                               select kvp.Value) {
         Entries.Add(CreateEntryViewModel(entry)); 
       }
-      _Subscription.EntryAdded += ModelEntryAdded;
-      _Subscription.PropertyChanged += ModelPropertyChanged;
+      Subscription.EntryAdded += ModelEntryAdded;
+      Subscription.PropertyChanged += ModelPropertyChanged;
     }
 
-    public Subscription _Subscription;
+    public Subscription Subscription;
 
     private EntryViewModel CreateEntryViewModel(Entry entry)
     {
@@ -49,7 +49,7 @@ namespace RssReader
     {
       get
       {
-        return _Subscription.Title;
+        return Subscription.Title;
       }
     }
 
@@ -58,9 +58,9 @@ namespace RssReader
       get
       {
         if (UnreadEntries > 0) {
-          return string.Format("{0} ({1} unread)", _Subscription.Title, UnreadEntries);
+          return string.Format("{0} ({1} unread)", Subscription.Title, UnreadEntries);
         } else {
-          return _Subscription.Title;
+          return Subscription.Title;
         }
       }
     }
@@ -87,7 +87,7 @@ namespace RssReader
     {
       get
       {
-        WebSubscription ws = _Subscription as WebSubscription;
+        WebSubscription ws = Subscription as WebSubscription;
         return ws != null && ws.PublicURI != null;
       }
     }
@@ -104,7 +104,7 @@ namespace RssReader
     {
       get
       {
-        WebSubscription ws = _Subscription as WebSubscription;
+        WebSubscription ws = Subscription as WebSubscription;
         return ws != null ? ws.PublicURI : null;
       }
     }
@@ -115,7 +115,7 @@ namespace RssReader
 
     public void ReadOnline()
     {
-      System.Diagnostics.Process.Start(((WebSubscription)_Subscription).PublicURI.ToString());
+      System.Diagnostics.Process.Start(((WebSubscription)Subscription).PublicURI.ToString());
     }
 
     public void MarkAllEntriesRead()
