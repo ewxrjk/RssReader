@@ -242,6 +242,7 @@ namespace ReaderLib.HTML
       if (ctx == Context.CON && value.Length > 0) {
         ProcessContent(value.ToString());
       }
+      RequireBody();
       if (Elements.Count == 0) {
         RequireBlockContext();
       }
@@ -249,6 +250,8 @@ namespace ReaderLib.HTML
     }
 
     private Stack<Element> Elements;
+
+    private Element Root;
 
     private bool StackContainsElement(string name)
     {
@@ -271,9 +274,23 @@ namespace ReaderLib.HTML
       }
     }
 
-    private void RequireSomeContext()
+    private void RequireHead()
     {
       RequireHtml();
+      if (!StackContainsElement("head")) {
+        while (Elements.Count > 1) {
+          ProcessCloseTag(Elements.Peek().Name);
+        }
+        ProcessOpenTag("head", null);
+      }
+    }
+
+    private void RequireBody()
+    {
+      RequireHtml();
+      if (Document.HTML.Contents.Count == 0) {
+        RequireHead();
+      }
       if (!StackContainsElement("body")) {
         while (Elements.Count > 1) {
           ProcessCloseTag(Elements.Peek().Name);
@@ -284,7 +301,7 @@ namespace ReaderLib.HTML
 
     private void RequireBlockContext()
     {
-      RequireSomeContext();
+      RequireBody();
       if(Elements.Peek().Name == "table") {
         RequireTableRowContext();
       }
@@ -302,14 +319,14 @@ namespace ReaderLib.HTML
     private void RequireInlineContext()
     {
       if (!StackContainsType(ElementType.Block)) {
-        RequireSomeContext();
+        RequireBody();
         ProcessOpenTag("p", null);
       }
     }
 
     private void RequireListContext()
     {
-      RequireSomeContext();
+      RequireBody();
       if (GetElementType(Elements.Peek().Name) != ElementType.ListContainer) {
         if (StackContainsType(ElementType.ListContainer)) {
           while (GetElementType(Elements.Peek().Name) != ElementType.ListContainer) {
@@ -324,7 +341,7 @@ namespace ReaderLib.HTML
 
     private void RequireTableContext()
     {
-      RequireSomeContext();
+      RequireBody();
       while (Elements.Peek().Name != "table" && Elements.Peek().Name != "body") {
         Elements.Pop();
       }
@@ -335,7 +352,7 @@ namespace ReaderLib.HTML
 
     private void RequireTableRowContext()
     {
-      RequireSomeContext();
+      RequireBody();
       while (Elements.Peek().Name != "tr"
              && Elements.Peek().Name != "table"
              && Elements.Peek().Name != "body") {
@@ -351,7 +368,7 @@ namespace ReaderLib.HTML
 
     private void RequireTableCellContext()
     {
-      RequireSomeContext();
+      RequireBody();
       while (Elements.Peek().Name != "td"
              && Elements.Peek().Name != "th"
              && Elements.Peek().Name != "tr"
@@ -381,6 +398,12 @@ namespace ReaderLib.HTML
           return;
         }
       }
+      if (StackContainsElement("head")) {
+        if (GetElementType(Elements.Peek().Name) == ElementType.Head) {
+          Elements.Peek().Contents.Add(new Cdata() { Content = s });
+          return;
+        }
+      }
       RequireInlineContext();
       Elements.Peek().Contents.Add(new Cdata() { Content = s });
     }
@@ -395,8 +418,9 @@ namespace ReaderLib.HTML
           return;
         }
       }
-      else if (name == "body") {
-        if (StackContainsElement("body")) {
+      else if (name == "body" || name == "head") {
+        RequireHtml();
+        if (StackContainsElement(name)) {
           return;
         }
         while (Elements.Count > 1) {
@@ -427,6 +451,10 @@ namespace ReaderLib.HTML
           case ElementType.TableCell:
             RequireTableRowContext();
             break;
+          case ElementType.Head:
+          case ElementType.HeadSingle:
+            RequireHead();
+            break;
         }
       }
       Element newElement = new Element()
@@ -444,6 +472,7 @@ namespace ReaderLib.HTML
       switch (GetElementType(name)) {
         case ElementType.InlineSingle:
         case ElementType.BlockSingle:
+        case ElementType.HeadSingle:
           break;
         default:
           Elements.Push(newElement);

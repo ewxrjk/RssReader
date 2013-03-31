@@ -13,8 +13,8 @@ namespace Tests
     {
       HTML.Document d = HTML.Document.Parse("");
       Assert.AreEqual("html", d.HTML.Name);
-      Assert.AreEqual(1, d.HTML.Contents.Count);
-      HTML.Element body = d.HTML.Contents[0] as HTML.Element;
+      Assert.AreEqual(2, d.HTML.Contents.Count);
+      HTML.Element body = d.HTML.Contents[1] as HTML.Element;
       Assert.AreNotEqual(null, body);
       Assert.AreEqual("body", body.Name);
       Assert.AreEqual(0, body.Contents.Count);
@@ -25,8 +25,8 @@ namespace Tests
     {
       HTML.Document d = HTML.Document.Parse("<p>wibble</p>");
       Assert.AreEqual("html", d.HTML.Name);
-      Assert.AreEqual(1, d.HTML.Contents.Count);
-      HTML.Element body = d.HTML.Contents[0] as HTML.Element;
+      Assert.AreEqual(2, d.HTML.Contents.Count);
+      HTML.Element body = d.HTML.Contents[1] as HTML.Element;
       Assert.AreNotEqual(null, body);
       Assert.AreEqual("body", body.Name);
       Assert.AreEqual(1, body.Contents.Count);
@@ -189,30 +189,39 @@ namespace Tests
       Assert.AreEqual("http://imgs.xkcd.com/comics/voyager_1.png", img.Attributes["src"]);
       Assert.IsTrue(img.Attributes.ContainsKey("title"));
       Assert.AreEqual("what'ever'", img.Attributes["title"]);
-      Assert.AreEqual("<html><body><p><img src=\"http://imgs.xkcd.com/comics/voyager_1.png\" title=\"what'ever'\"></p></body></html>", d.ToString());
+      Assert.AreEqual("<html><head></head><body><p><img src=\"http://imgs.xkcd.com/comics/voyager_1.png\" title=\"what'ever'\"></p></body></html>", d.ToString());
     }
 
     [TestMethod]
     public void TestHTMLTable()
     {
       HTML.Document d = HTML.Document.Parse("<table><tr><td>a</td><td>b</td><tr><td>c</td>");
-      Assert.AreEqual("<html><body><table><tr><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
+      Assert.AreEqual("<html><head></head><body><table><tr><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
     }
 
     [TestMethod]
     public void TestHTMLSpaceTable()
     {
       HTML.Document d = HTML.Document.Parse("<table>\n <tr>\n  <td>a</td>\n  <td>b</td>\n <tr>\n  <td>c</td>\n</table>\n");
-      Assert.AreEqual("<html><body><table><tr><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
+      Assert.AreEqual("<html><head></head><body><table><tr><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
     }
 
     [TestMethod]
     public void TestHTMLComment()
     {
       HTML.Document d = HTML.Document.Parse("<!--comment-->spong");
-      Assert.AreEqual("<html><body><p>spong</p></body></html>", d.ToString());
+      Assert.AreEqual("<html><head></head><body><p>spong</p></body></html>", d.ToString());
       d = HTML.Document.Parse("this and <!--comment--> that");
-      Assert.AreEqual("<html><body><p>this and  that</p></body></html>", d.ToString());
+      Assert.AreEqual("<html><head></head><body><p>this and  that</p></body></html>", d.ToString());
+    }
+
+    [TestMethod]
+    public void TestHTMLHead()
+    {
+      HTML.Document d = HTML.Document.Parse("<head><title>T<body>B");
+      Assert.AreEqual("<html><head><title>T</title></head><body><p>B</p></body></html>", d.ToString());
+      d = HTML.Document.Parse("<head><link rel='foo' href='bar'>");
+      Assert.AreEqual("<html><head><link href=\"bar\" rel=\"foo\"></head><body></body></html>", d.ToString());
     }
 
   }

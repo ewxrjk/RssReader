@@ -80,7 +80,7 @@ namespace ReaderLib.HTML
     public override void Write(TextWriter writer)
     {
       writer.Write("<{0}", Name);
-      foreach (KeyValuePair<string, string> kvp in Attributes) {
+      foreach (KeyValuePair<string, string> kvp in from kvp in Attributes orderby kvp.Key select kvp) {
         writer.Write(" {0}=\"", kvp.Key);
         foreach (char c in kvp.Value) {
           switch (c) {
@@ -100,6 +100,7 @@ namespace ReaderLib.HTML
       switch (Parser.GetElementType(Name)) {
         case Parser.ElementType.InlineSingle:
         case Parser.ElementType.BlockSingle:
+        case Parser.ElementType.HeadSingle:
           break;
         default:
           foreach (Node node in Contents) {
