@@ -61,7 +61,7 @@ namespace ReaderLib
 
     #region Public Fields And Properties
 
-    [UserVisible(Modifiable = false)]
+    [UserVisible(Modifiable = false, Priority = 0)]
     public string Title
     {
       get
@@ -84,7 +84,7 @@ namespace ReaderLib
     /// When the subscription was last checked
     /// </summary>
     [XmlIgnore]
-    [UserVisible(Description = "Last checked", Modifiable = false)]
+    [UserVisible(Description = "Last checked", Modifiable = false, Priority = 256)]
     public DateTime LastCheck {
       get {
         Load();
@@ -147,8 +147,9 @@ namespace ReaderLib
     static private string Order(PropertyInfo pi)
     {
       UserVisibleAttribute uva = pi.GetCustomAttribute<UserVisibleAttribute>();
-      return string.Format("{0}-{1}",
+      return string.Format("{0}-{1}-{2}",
                            uva.Modifiable ? 0 : 1,
+                           uva.Priority,
                            uva.Description != null ? uva.Description : pi.Name);
     }
 

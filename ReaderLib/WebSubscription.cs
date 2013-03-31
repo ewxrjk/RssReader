@@ -49,7 +49,7 @@ namespace ReaderLib
 
     #region Public Properties
 
-    [UserVisible(Modifiable = false)]
+    [UserVisible(Modifiable = false, Priority = 1)]
     public string Description
     {
       get
@@ -71,7 +71,7 @@ namespace ReaderLib
     /// <summary>
     /// The URI of the subscription
     /// </summary>
-    [UserVisible(Description = "Feed URI", Modifiable = true)]
+    [UserVisible(Description = "Feed URI", Modifiable = true, Priority = 0)]
     public string URI
     {
       get
@@ -96,7 +96,7 @@ namespace ReaderLib
     /// <remarks>
     /// <para><code>null</code> if there is no user-facing URI.</para>
     /// </remarks>
-    [UserVisible(Description = "Browser URI", Modifiable = false)]
+    [UserVisible(Description = "Browser URI", Modifiable = false, Priority = 2)]
     public string PublicURI
     {
       get
@@ -116,7 +116,7 @@ namespace ReaderLib
     private string _PublicURI;
 
     [XmlIgnore]
-    [UserVisible(Description = "Feed type", Modifiable = false)]
+    [UserVisible(Description = "Feed type", Modifiable = false, Priority = 257)]
     public string Type
     {
       get

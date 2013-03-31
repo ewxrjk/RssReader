@@ -16,6 +16,7 @@ namespace ReaderLib
     {
       Modifiable = false;
       MimeType = "text/plain";
+      Priority = 0;
     }
 
     /// <summary>
@@ -32,5 +33,10 @@ namespace ReaderLib
     /// MIME type (for strings)
     /// </summary>
     public string MimeType { get; set; }
+
+    /// <summary>
+    /// Priority
+    /// </summary>
+    public int Priority { get; set; }
   }
 }
