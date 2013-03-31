@@ -71,7 +71,7 @@ namespace ReaderLib
     /// <summary>
     /// The URI of the subscription
     /// </summary>
-    [UserVisible(Description = "Feed URI", Modifiable = true, Priority = 0)]
+    [UserVisible(Description = "Feed URI", Modifiable = true, Priority = 0, Type = "URI")]
     public string URI
     {
       get
@@ -96,7 +96,7 @@ namespace ReaderLib
     /// <remarks>
     /// <para><code>null</code> if there is no user-facing URI.</para>
     /// </remarks>
-    [UserVisible(Description = "Browser URI", Modifiable = false, Priority = 2)]
+    [UserVisible(Description = "Browser URI", Modifiable = false, Priority = 2, Type = "URI")]
     public string PublicURI
     {
       get

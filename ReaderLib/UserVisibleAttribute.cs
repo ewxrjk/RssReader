@@ -15,7 +15,7 @@ namespace ReaderLib
     public UserVisibleAttribute()
     {
       Modifiable = false;
-      MimeType = "text/plain";
+      Type = "text/plain";
       Priority = 0;
     }
 
@@ -30,9 +30,9 @@ namespace ReaderLib
     public bool Modifiable { get; set; }
 
     /// <summary>
-    /// MIME type (for strings)
+    /// Type (MIME plus extensions)
     /// </summary>
-    public string MimeType { get; set; }
+    public string Type { get; set; }
 
     /// <summary>
     /// Priority

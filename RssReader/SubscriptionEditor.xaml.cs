@@ -68,26 +68,59 @@ namespace RssReader
         GridWidget.Children.Add(l);
         Grid.SetRow(l, i);
         Grid.SetColumn(l, 0);
-        TextBox t = new TextBox() { 
-          IsReadOnly = !uva.Modifiable,
-          Margin = new Thickness(2),
-          HorizontalAlignment = HorizontalAlignment.Left,
-          VerticalAlignment = VerticalAlignment.Center,
-          MinWidth = 384,
-        };
-        if (!uva.Modifiable) {
-          t.BorderThickness = new Thickness(0);
+        if (uva.Type == "URI" && !uva.Modifiable) {
+          TextBlock t = new TextBlock()
+          {
+            Margin = new Thickness(2),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+          };
+          Hyperlink hl = new Hyperlink();
+          hl.SetBinding(Hyperlink.NavigateUriProperty,
+                        new Binding()
+                        {
+                          Source = _Subscription,
+                          Path = new PropertyPath(pi.Name),
+                          Mode = BindingMode.OneWay,
+                        });
+          Run r = new Run();
+          r.SetBinding(Run.TextProperty,
+                      new Binding()
+                      {
+                        Source = _Subscription,
+                        Path = new PropertyPath(pi.Name),
+                        Mode = BindingMode.OneWay,
+                      });
+          hl.Inlines.Add(r);
+          hl.RequestNavigate += RequestedNavigate;
+          t.Inlines.Add(hl);
+          GridWidget.Children.Add(t);
+          Grid.SetRow(t, i);
+          Grid.SetColumn(t, 1);
         }
-        t.SetBinding(TextBox.TextProperty,
-                     new Binding()
-                     {
-                       Source = _Subscription,
-                       Path = new PropertyPath(pi.Name),
-                       Mode = uva.Modifiable ? BindingMode.TwoWay : BindingMode.OneWay,
-                     });
-        GridWidget.Children.Add(t);
-        Grid.SetRow(t, i);
-        Grid.SetColumn(t, 1);
+        else {
+          TextBox t = new TextBox()
+          {
+            IsReadOnly = !uva.Modifiable,
+            Margin = new Thickness(2),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            MinWidth = 384,
+          };
+          if (!uva.Modifiable) {
+            t.BorderThickness = new Thickness(0);
+          }
+          t.SetBinding(TextBox.TextProperty,
+                       new Binding()
+                       {
+                         Source = _Subscription,
+                         Path = new PropertyPath(pi.Name),
+                         Mode = uva.Modifiable ? BindingMode.TwoWay : BindingMode.OneWay,
+                       });
+          GridWidget.Children.Add(t);
+          Grid.SetRow(t, i);
+          Grid.SetColumn(t, 1);
+        }
         if (uva.Modifiable) {
           object original = pi.GetValue(_Subscription);
           ResetList[pi] = original is ICloneable ? ((ICloneable)original).Clone() : original;
@@ -119,6 +152,12 @@ namespace RssReader
     private void OK(object sender, RoutedEventArgs e)
     {
       this.Close();
+    }
+
+    static private void RequestedNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+    {
+      System.Diagnostics.Process.Start(e.Uri.ToString());
+      e.Handled = true;
     }
 
     #endregion
