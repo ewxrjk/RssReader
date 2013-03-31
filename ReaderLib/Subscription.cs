@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 using System.IO;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Reflection;
 
 namespace ReaderLib
 {
@@ -139,6 +140,30 @@ namespace ReaderLib
     /// </summary>
     [XmlIgnore]
     public SubscriptionList Parent;
+
+    #endregion
+
+    #region Modifiable Properties
+
+    static private bool HasUserVisibleAttribute(PropertyInfo pi) {
+      return pi.GetCustomAttribute<UserVisibleAttribute>() != null;
+    }
+
+    static private string Order(PropertyInfo pi)
+    {
+      UserVisibleAttribute uva = pi.GetCustomAttribute<UserVisibleAttribute>();
+      return string.Format("{0}-{1}",
+                           uva.Modifiable ? 0 : 1,
+                           uva.Description != null ? uva.Description : pi.Name);
+    }
+
+    public PropertyInfo[] GetUserVisibleProperties()
+    {
+      return (from pi in GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
+              where HasUserVisibleAttribute(pi)
+              orderby Order(pi)
+              select pi).ToArray();
+    }
 
     #endregion
 
