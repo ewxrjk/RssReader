@@ -102,6 +102,17 @@ namespace ReaderLib.HTML
         case Parser.ElementType.BlockSingle:
         case Parser.ElementType.HeadSingle:
           break;
+        case Parser.ElementType.HeadSpecial:
+          foreach (Node node in Contents) {
+            if (node is Cdata) {
+              writer.Write(((Cdata)node).Content);
+            }
+            else {
+              node.Write(writer);
+            }
+          }
+          writer.Write("</{0}>", Name);
+          break;
         default:
           foreach (Node node in Contents) {
             node.Write(writer);

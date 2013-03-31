@@ -169,7 +169,6 @@ namespace ReaderLib
 
     override public void Update(Action<Action> dispatch, Action<Exception> error)
     {
-      // TODO atom support
       try {
         WebRequest request = WebRequest.Create(URI);
         WebResponse response = request.GetResponse();

@@ -231,5 +231,14 @@ namespace Tests
       Assert.AreEqual("<html><head></head><body><p>B</p></body></html>", d.ToString());
     }
 
+    [TestMethod]
+    public void TestHTMLScript()
+    {
+      HTML.Document d = HTML.Document.Parse("<head><script><T</script>");
+      Assert.AreEqual("<html><head><script><T</script></head><body></body></html>", d.ToString());
+      d = HTML.Document.Parse("<head><style><T</style>");
+      Assert.AreEqual("<html><head><style><T</style></head><body></body></html>", d.ToString());
+    }
+
   }
 }

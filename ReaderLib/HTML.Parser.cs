@@ -231,6 +231,9 @@ namespace ReaderLib.HTML
           ctx = stack.Pop();
           if (tagType == TokenType.stago) {
             ProcessOpenTag(tagName, attributes);
+            if (GetElementType(tagName) == ElementType.HeadSpecial) {
+              ctx = Context.CON_special;
+            }
           }
           else {
             ProcessCloseTag(tagName);
@@ -402,7 +405,8 @@ namespace ReaderLib.HTML
         }
       }
       if (StackContainsElement("head")) {
-        if (GetElementType(Elements.Peek().Name) == ElementType.Head) {
+        if (GetElementType(Elements.Peek().Name) == ElementType.Head
+            || GetElementType(Elements.Peek().Name) == ElementType.HeadSpecial) {
           Elements.Peek().Contents.Add(new Cdata() { Content = s });
           return;
         }
@@ -456,6 +460,7 @@ namespace ReaderLib.HTML
             break;
           case ElementType.Head:
           case ElementType.HeadSingle:
+          case ElementType.HeadSpecial:
             RequireHead();
             break;
         }
@@ -560,6 +565,7 @@ namespace ReaderLib.HTML
       TAG_ename, // expecting name (end tag)
       TAG_attrname, // expecting attribute name
       TAG_attrvalue, // expecting attribute value
+      CON_special, // CON but inside <script> or <style> (HTML is *weird*)
     };
 
     private delegate TokenType ParseDelegate();
@@ -635,6 +641,12 @@ namespace ReaderLib.HTML
                 return TokenType.etago;
               }
               return TokenType.stago;
+            case Context.CON_special:
+              if (Input.Peek() == (int)'/') {
+                Input.Read();
+                return TokenType.etago;
+              }
+              break;
           }
           break;
         case '"':
