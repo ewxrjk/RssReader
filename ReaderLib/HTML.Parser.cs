@@ -62,8 +62,8 @@ namespace ReaderLib.HTML
       Dictionary<string, string> attributes = null;
       StringBuilder value = new StringBuilder();
       Stack<StringBuilder> valueStack = new Stack<StringBuilder>();
-      if (Input.Peek() == (char)0xFEFF) { // BOM
-        Input.Read();
+      if (Peek() == (char)0xFEFF) { // BOM
+        Read();
       }
       while ((t = GetToken(ctx)) != TokenType.eof) {
 
@@ -525,6 +525,8 @@ namespace ReaderLib.HTML
       return true;
     }
 
+    #region SGML Tokenization
+
     /// <summary>
     /// Token types
     /// </summary>
@@ -584,14 +586,14 @@ namespace ReaderLib.HTML
     /// <returns></returns>
     private TokenType GetToken(Context ctx)
     {
-      int ch = Input.Peek();
+      int ch = Peek();
       if (ch == -1) {
         return TokenType.eof;
       }
       // Special case to detect unterminated entity references
       if (ctx == Context.REF && !char.IsLetterOrDigit((char)ch)) {
         if (ch == (int)';') {
-          Input.Read();
+          Read();
           FakeRefc = false;
         }
         else {
@@ -599,7 +601,7 @@ namespace ReaderLib.HTML
         }
         return TokenType.refc;
       }
-      Input.Read();
+      Read();
       LastCharacter = (char)ch;
       switch (LastCharacter) {
         case '-':
@@ -612,8 +614,8 @@ namespace ReaderLib.HTML
           switch (ctx) {
             case Context.CON:
             case Context.LIT:
-              if (Input.Peek() == (int)'#') {
-                Input.Read();
+              if (Peek() == (int)'#') {
+                Read();
                 return TokenType.cro;
               }
               return TokenType.ero;
@@ -623,12 +625,12 @@ namespace ReaderLib.HTML
           switch (ctx) {
             case Context.CON:
             case Context.DSM:
-              if (Input.Peek() == (char)'!') {
-                Input.Read();
+              if (Peek() == (char)'!') {
+                Read();
                 return TokenType.mdo;
               }
-              if (Input.Peek() == (char)'?') {
-                Input.Read();
+              if (Peek() == (char)'?') {
+                Read();
                 return TokenType.pio;
               }
               break;
@@ -639,14 +641,14 @@ namespace ReaderLib.HTML
             case Context.TAG_ename:
             case Context.TAG_attrname:
             case Context.TAG_attrvalue:
-              if (Input.Peek() == (int)'/') {
-                Input.Read();
+              if (Peek() == (int)'/') {
+                Read();
                 return TokenType.etago;
               }
               return TokenType.stago;
             case Context.CON_special:
-              if (Input.Peek() == (int)'/') {
-                Input.Read();
+              if (Peek() == (int)'/') {
+                Read();
                 return TokenType.etago;
               }
               break;
@@ -693,5 +695,40 @@ namespace ReaderLib.HTML
       }
       return TokenType.character;
     }
+
+    #endregion
+
+    #region Character Input
+
+    // StreamReader.Peek doesn't always work
+
+    private Stack<int> PushedBack = new Stack<int>();
+
+    private int Peek()
+    {
+      int ch = Read();
+      if (ch != -1) {
+        Pushback(ch);
+      }
+      return ch;
+    }
+
+    private int Read()
+    {
+      if (PushedBack.Count > 0) {
+        return PushedBack.Pop();
+      }
+      else {
+        return Input.Read();
+      }
+    }
+
+    private void Pushback(int ch)
+    {
+      PushedBack.Push(ch);
+    }
+
+    #endregion
+
   }
 }
