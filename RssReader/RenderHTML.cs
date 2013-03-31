@@ -120,7 +120,6 @@ namespace RssReader
       int maxcol = 0;
       int row = 0;
       int col;
-      Console.WriteLine("Render table: {0}", e);
       foreach (HTML.Element r in e.Contents) {
         col = 0;
         foreach (HTML.Element c in e.Contents) {
