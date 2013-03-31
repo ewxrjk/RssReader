@@ -102,7 +102,7 @@ namespace ReaderLib
         path = Filename(parent);
       }
       T newComponent;
-      if (File.Exists(path)) {
+      if (path != null && File.Exists(path)) {
         using (StreamReader sr = new StreamReader(path)) {
           newComponent = (T)GetSerializer(typeof(T)).Deserialize(sr);
         }

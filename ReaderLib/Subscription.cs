@@ -257,9 +257,14 @@ namespace ReaderLib
     /// <returns></returns>
     public string Directory()
     {
-      return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                          "RssReader",
-                          Parent.Identity.ToString());
+      if (Parent != null) {
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                            "RssReader",
+                            Parent.Identity.ToString());
+      }
+      else {
+        return null;
+      }
     }
 
     #endregion
