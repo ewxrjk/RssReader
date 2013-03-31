@@ -248,9 +248,14 @@ namespace ReaderLib.HTML
       if (ctx == Context.CON && value.Length > 0) {
         ProcessContent(value.ToString());
       }
-      RequireBody();
-      if (Elements.Count == 0) {
-        RequireBlockContext();
+      if (Document.HTML == null) {
+        RequireHtml();
+      }
+      if (Document.HTML.FindChild("head") == null) {
+        RequireHead();
+      }
+      if (Document.HTML.FindChild("body") == null) {
+        RequireBody();
       }
       return Document;
     }

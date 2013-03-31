@@ -240,5 +240,21 @@ namespace Tests
       Assert.AreEqual("<html><head><style><T</style></head><body></body></html>", d.ToString());
     }
 
+    [TestMethod]
+    public void TestHTMLXml()
+    {
+      HTML.Document d = HTML.Document.Parse("<meta http-equiv=\"something\" /><link rel=whatever /><link rel=alternate />");
+      Assert.AreEqual("<html><head><meta http-equiv=\"something\"><link rel=\"whatever\"><link rel=\"alternate\"></head><body></body></html>", d.ToString());
+      d = HTML.Document.Parse("<html a=a xml:lang=\"en-US\" z=z>T");
+      Assert.AreEqual("<html a=\"a\" xml:lang=\"en-US\" z=\"z\"><head></head><body><p>T</p></body></html>", d.ToString());
+    }
+
+    [TestMethod]
+    public void TestHTMLExplicitClose()
+    {
+      HTML.Document d = HTML.Document.Parse("<html><head><title>T</title></head><body>B</body></html>");
+      Assert.AreEqual("<html><head><title>T</title></head><body><p>B</p></body></html>", d.ToString());
+    }
+
   }
 }
