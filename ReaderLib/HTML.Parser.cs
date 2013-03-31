@@ -257,8 +257,6 @@ namespace ReaderLib.HTML
 
     private Stack<Element> Elements;
 
-    private Element Root;
-
     private bool StackContainsElement(string name)
     {
       return (from element in Elements

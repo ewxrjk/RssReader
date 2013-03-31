@@ -15,7 +15,7 @@ namespace Tests
       Assert.AreEqual("html", d.HTML.Name);
       Assert.AreEqual(2, d.HTML.Contents.Count);
       HTML.Element body = d.HTML.Contents[1] as HTML.Element;
-      Assert.AreNotEqual(null, body);
+      Assert.IsNotNull(body);
       Assert.AreEqual("body", body.Name);
       Assert.AreEqual(0, body.Contents.Count);
     }
@@ -27,7 +27,7 @@ namespace Tests
       Assert.AreEqual("html", d.HTML.Name);
       Assert.AreEqual(2, d.HTML.Contents.Count);
       HTML.Element body = d.HTML.Contents[1] as HTML.Element;
-      Assert.AreNotEqual(null, body);
+      Assert.IsNotNull(body);
       Assert.AreEqual("body", body.Name);
       Assert.AreEqual(1, body.Contents.Count);
       HTML.Element p = body.Contents[0] as HTML.Element;

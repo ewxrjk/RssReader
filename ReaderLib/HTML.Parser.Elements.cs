@@ -91,7 +91,7 @@ namespace ReaderLib.HTML
       { "link", ElementType.HeadSingle },
       { "map", ElementType.Inline },
       { "menu", ElementType.Ignore },
-      { "meta", ElementType.Head },
+      { "meta", ElementType.HeadSingle },
       { "noframes", ElementType.Ignore },
       { "noscript", ElementType.Block },
       { "object", ElementType.Ignore },
