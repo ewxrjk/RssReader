@@ -25,11 +25,6 @@ namespace ReaderLib
     #region Virtual methods
 
     /// <summary>
-    /// The subscription type.
-    /// </summary>
-    abstract public string Type();
-
-    /// <summary>
     /// Update this subscription
     /// </summary>
     /// <param name="dispatch">Callback method to perform updates</param>

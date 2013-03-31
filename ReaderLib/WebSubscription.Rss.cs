@@ -38,6 +38,7 @@ namespace ReaderLib
         foreach (XElement item in items) {
           UpdateEntry(item, GetUniqueIdFromRss(item, error), UpdateFromRss, error);
         }
+        Type = "RSS";
       });
     }
 

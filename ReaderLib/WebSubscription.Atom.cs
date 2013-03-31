@@ -28,6 +28,7 @@ namespace ReaderLib
         foreach (XElement item in items) {
           UpdateEntry(item, HashId((string)item.Element(Atom + "id")), UpdateFromAtom, error);
         }
+        Type = "Atom";
       });
     }
 

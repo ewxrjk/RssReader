@@ -26,11 +26,6 @@ namespace ReaderLib
       Hash = "SHA1";
     }
 
-    public override string Type()
-    {
-      return "RSS";
-    }
-
     /// <summary>
     /// Return the suggested next update time
     /// </summary>
@@ -119,6 +114,26 @@ namespace ReaderLib
 
     [XmlIgnore]
     private string _PublicURI;
+
+    [XmlIgnore]
+    [UserVisible(Description = "Feed type", Modifiable = false)]
+    public string Type
+    {
+      get
+      {
+        return _Type;
+      }
+      set
+      {
+        if (_Type != value) {
+          _Type = value;
+          OnPropertyChanged();
+        }
+      }
+    }
+
+    [XmlIgnore]
+    private string _Type = "unknown";
 
     /// <summary>
     /// Time to live
