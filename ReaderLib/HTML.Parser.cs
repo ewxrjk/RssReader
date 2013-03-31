@@ -62,6 +62,9 @@ namespace ReaderLib.HTML
       Dictionary<string, string> attributes = null;
       StringBuilder value = new StringBuilder();
       Stack<StringBuilder> valueStack = new Stack<StringBuilder>();
+      if (Input.Peek() == (char)0xFEFF) { // BOM
+        Input.Read();
+      }
       while ((t = GetToken(ctx)) != TokenType.eof) {
 
         if (t == TokenType.com) { // Start or end of a comment

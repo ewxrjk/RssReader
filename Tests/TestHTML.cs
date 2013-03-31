@@ -224,5 +224,12 @@ namespace Tests
       Assert.AreEqual("<html><head><link href=\"bar\" rel=\"foo\"></head><body></body></html>", d.ToString());
     }
 
+    [TestMethod]
+    public void TestHTMLBOM()
+    {
+      HTML.Document d = HTML.Document.Parse("\uFEFFB");
+      Assert.AreEqual("<html><head></head><body><p>B</p></body></html>", d.ToString());
+    }
+
   }
 }
