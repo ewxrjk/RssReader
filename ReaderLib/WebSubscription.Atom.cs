@@ -23,12 +23,26 @@ namespace ReaderLib
       IEnumerable<XElement> items = atom.Elements(Atom + "entry").Reverse();
       dispatch(() =>
       {
-        Title = title;
-        PublicURI = publicUri;
-        foreach (XElement item in items) {
-          UpdateEntry(item, HashId((string)item.Element(Atom + "id")), UpdateFromAtom, error);
+        try {
+          Title = title;
+          PublicURI = publicUri;
+          foreach (XElement item in items) {
+            UpdateEntry(item, HashId((string)item.Element(Atom + "id")), UpdateFromAtom, error);
+          }
+          Type = "Atom";
+          Error = null;
         }
-        Type = "Atom";
+        catch (SubscriptionException se) {
+          if (se.Subscription == null) {
+            se.Subscription = this;
+          }
+          error(se);
+          Error = se;
+        }
+        catch (Exception e) {
+          error(e);
+          Error = e;
+        }
       });
     }
 
@@ -41,7 +55,7 @@ namespace ReaderLib
         entry.Date = Tools.RFC3339Date(updated);
       }
       catch (Exception e) {
-        error(new SubscriptionParsingException(string.Format("invalid date: {0}", updated), e));
+        error(new SubscriptionParsingException(string.Format("Invalid date string “{0}”", updated), e) { Subscription = this });
       }
       XElement content = element.Element(Atom + "content");
       if (content != null) {

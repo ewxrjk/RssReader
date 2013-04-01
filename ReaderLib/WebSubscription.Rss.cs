@@ -31,14 +31,28 @@ namespace ReaderLib
       IEnumerable<XElement> items = channel.Elements("item").Reverse();
       dispatch(() =>
       {
-        Title = title;
-        Description = description;
-        PublicURI = publicURI;
-        TTL = ttlValue;
-        foreach (XElement item in items) {
-          UpdateEntry(item, GetUniqueIdFromRss(item, error), UpdateFromRss, error);
+        try {
+          Title = title;
+          Description = description;
+          PublicURI = publicURI;
+          TTL = ttlValue;
+          foreach (XElement item in items) {
+            UpdateEntry(item, GetUniqueIdFromRss(item, error), UpdateFromRss, error);
+          }
+          Type = "RSS";
+          Error = null;
         }
-        Type = "RSS";
+        catch (SubscriptionException se) {
+          if (se.Subscription == null) {
+            se.Subscription = this;
+          }
+          error(se);
+          Error = se;
+        }
+        catch (Exception e) {
+          error(e);
+          Error = e;
+        }
       });
     }
 
@@ -66,8 +80,8 @@ namespace ReaderLib
         }
       }
       catch (Exception e) {
-        error(new SubscriptionParsingException(string.Format("invalid date: {0}", (string)pubDate),
-                                               e));
+        error(new SubscriptionParsingException(string.Format("Invalid date string “{0}”", (string)pubDate),
+                                               e) { Subscription = this });
       }
       // TODO author, category, comments, enclosure, source 
     }

@@ -179,10 +179,11 @@ namespace ReaderLib
       catch (Exception e) {
         dispatch(() =>
         {
-          error(new SubscriptionFetchingException(e.Message, e)
+          Error = new SubscriptionFetchingException(e.Message, e)
           {
             Subscription = this
-          });
+          };
+          error(Error);
         });
       }
     }
@@ -231,6 +232,7 @@ namespace ReaderLib
         update(entry, item, error);
       }
       catch (SubscriptionParsingException spe) {
+        // If individual errors fail, we just log them and move on
         spe.Subscription = this;
         error(spe);
       }

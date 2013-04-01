@@ -92,6 +92,23 @@ namespace ReaderLib
       }
     }
 
+    [XmlIgnore]
+    [UserVisible(Description = "Last error", Modifiable = false, Priority = 257)]
+    public Exception Error
+    {
+      get { return _Error; }
+      set
+      {
+        if (_Error != value) {
+          _Error = value;
+          OnPropertyChanged();
+        }
+      }
+    }
+
+    [XmlIgnore]
+    private Exception _Error = null;
+
     /// <summary>
     /// Called when this subscription has just been checked
     /// </summary>
