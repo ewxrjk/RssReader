@@ -15,13 +15,15 @@ using System.Windows.Shapes;
 using ReaderLib;
 using Microsoft.Win32;
 using System.IO;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace RssReader
 {
   /// <summary>
   /// Interaction logic for MainWindow.xaml
   /// </summary>
-  public partial class MainWindow : Window
+  public partial class MainWindow : Window, INotifyPropertyChanged
   {
     #region Commands
 
@@ -37,13 +39,16 @@ namespace RssReader
       ExitCommand.InputGestures.Add(new KeyGesture(Key.Q, ModifierKeys.Control));
       ImportCommand.InputGestures.Add(new KeyGesture(Key.I, ModifierKeys.Control));
       SubscribeCommand.InputGestures.Add(new KeyGesture(Key.S, ModifierKeys.Control));
+      ApplicationCommands.Undo.InputGestures.Add(new KeyGesture(Key.Z, ModifierKeys.Control));
+      ApplicationCommands.Redo.InputGestures.Add(new KeyGesture(Key.Y, ModifierKeys.Control));
     }
 
     #endregion
 
     #region Initialization
 
-    public MainWindow(): this(null)
+    public MainWindow()
+      : this(null)
     {
     }
 
@@ -135,7 +140,13 @@ namespace RssReader
       };
       editor.ShowDialog();
       if (editor.Accept) {
-        _Subscriptions.Add(editor.Subscription);
+        Subscription sub = editor.Subscription;
+        Perform(new Performable()
+        {
+          Description = string.Format("subscribe to {0}", sub.Title),
+          Redo = () => _Subscriptions.Add(sub),
+          Undo = () => _Subscriptions.Remove(sub)
+        });
       }
     }
 
@@ -155,8 +166,28 @@ namespace RssReader
         if (result == true) {
           using (FileStream stream = new FileStream(openFileDialog.FileName, FileMode.Open)) {
             GoogleSubscriptions importer = new GoogleSubscriptions(stream);
-            foreach(Subscription sub in importer.GetSubscriptions()) {
-              _Subscriptions.Add(sub);
+            Subscription[] newSubscriptions = (from sub in importer.GetSubscriptions()
+                                            where !_Subscriptions.Contains(sub)
+                                            select sub).ToArray();
+            if (newSubscriptions.Length > 0) {
+              Perform(new Performable()
+              {
+                Description = (newSubscriptions.Length == 1
+                               ? string.Format("subscribe to {0}", newSubscriptions[0].Title)
+                               : string.Format("{0} subscriptions", newSubscriptions.Length)),
+                Redo = () =>
+                {
+                  foreach (Subscription sub in newSubscriptions) {
+                    _Subscriptions.Add(sub);
+                  }
+                },
+                Undo = () =>
+                {
+                  foreach (Subscription sub in newSubscriptions) {
+                    _Subscriptions.Remove(sub);
+                  }
+                }
+              });
             }
           }
         }
@@ -164,6 +195,11 @@ namespace RssReader
       catch (Exception error) {
         Error(error);
       }
+    }
+
+    private void OpenErrorLogExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+      Errors.OpenWindow();
     }
 
     private void ExitExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -178,11 +214,32 @@ namespace RssReader
 
     #endregion
 
-    #region Tools Menu
+    #region Edit Menu
 
-    private void OpenErrorLogExecuted(object sender, ExecutedRoutedEventArgs e)
+    private void UndoExecuted(object sender, ExecutedRoutedEventArgs e)
     {
-      Errors.OpenWindow();
+      if (UndoStack.Count > 0) {
+        Performable p = UndoStack.Pop();
+        RedoStack.Push(p);
+        p.Undo();
+        OnPropertyChanged("UndoDescription");
+        OnPropertyChanged("UndoEnabled");
+        OnPropertyChanged("RedoDescription");
+        OnPropertyChanged("RedoEnabled");
+      }
+    }
+
+    private void RedoExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+      if (RedoStack.Count > 0) {
+        Performable p = RedoStack.Pop();
+        UndoStack.Push(p);
+        p.Redo();
+        OnPropertyChanged("UndoDescription");
+        OnPropertyChanged("UndoEnabled");
+        OnPropertyChanged("RedoDescription");
+        OnPropertyChanged("RedoEnabled");
+      }
     }
 
     #endregion
@@ -200,11 +257,9 @@ namespace RssReader
 
     private void SelectSubscription(object sender, SelectionChangedEventArgs e)
     {
+      OnPropertyChanged("SubscriptionSelected");
       object selected = SubscriptionsWidget.SelectedItem;
-      if (selected == EntriesWidget.ItemsSource) {
-        return;
-      }
-      EntriesWidget.ItemsSource = ((SubscriptionViewModel)selected).Entries;
+      EntriesWidget.ItemsSource = selected != null ? ((SubscriptionViewModel)selected).Entries : null;
     }
 
     #endregion
@@ -231,9 +286,76 @@ namespace RssReader
       editor.ShowDialog();
     }
 
-    private void DeleteSubscription(object sender, RoutedEventArgs e)
+    private void UnsubscribeSubscription(object sender, RoutedEventArgs e)
     {
-      // TODO
+      Subscription subscription = ((SubscriptionViewModel)SubscriptionsWidget.SelectedItem).Subscription;
+      Perform(new Performable()
+      {
+        Description = string.Format("unsubscribe from {0}", subscription.Title),
+        Redo = () => _Subscriptions.Remove(subscription),
+        Undo = () => _Subscriptions.Add(subscription)
+      });
+    }
+
+    public bool SubscriptionSelected
+    {
+      get
+      {
+        return SubscriptionsWidget.SelectedIndex != -1;
+      }
+    }
+
+    #endregion
+
+    #region Undo and Redo
+
+    Stack<Performable> UndoStack = new Stack<Performable>();
+
+    Stack<Performable> RedoStack = new Stack<Performable>();
+
+    public void Perform(Performable p)
+    {
+      RedoStack.Clear();
+      UndoStack.Push(p);
+      p.Redo();
+      OnPropertyChanged("UndoDescription");
+      OnPropertyChanged("UndoEnabled");
+      OnPropertyChanged("RedoDescription");
+      OnPropertyChanged("RedoEnabled");
+    }
+
+    public string UndoDescription
+    {
+      get
+      {
+        return UndoStack.Count > 0 ? string.Format("Undo {0}", UndoStack.Peek().Description) : "Undo";
+      }
+    }
+
+    public bool UndoEnabled { get { return UndoStack.Count > 0; } }
+
+    public string RedoDescription
+    {
+      get
+      {
+        return RedoStack.Count > 0 ? string.Format("Redo {0}", RedoStack.Peek().Description) : "Redo";
+      }
+    }
+
+    public bool RedoEnabled { get { return RedoStack.Count > 0; } }
+
+    #endregion
+
+    #region INotifyPropertyChanged
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public void OnPropertyChanged([CallerMemberName]string propertyName = "")
+    {
+      PropertyChangedEventHandler handler = PropertyChanged;
+      if (handler != null) {
+        handler(this, new PropertyChangedEventArgs(propertyName));
+      }
     }
 
     #endregion

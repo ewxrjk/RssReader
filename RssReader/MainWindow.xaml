@@ -11,11 +11,13 @@
       <MenuItem Header="_Read online" Click="ReadSubscriptionOnline" IsEnabled="{Binding CanReadOnline}" ToolTip="{Binding PublicURI}"/>
       <MenuItem Header="_Mark all read" Click="MarkSubscriptionRead" IsEnabled="{Binding HasUnreadEntries}"/>
       <MenuItem Header="_Edit" Click="EditSubscription"/>
-      <MenuItem Header="_Delete" Click="DeleteSubscription"/>
+      <MenuItem Header="_Unsubscribe" Click="UnsubscribeSubscription"/>
     </ContextMenu>
   </Window.Resources>
   <Window.CommandBindings>
     <CommandBinding Command="ApplicationCommands.Close" Executed="CloseExecuted"/>
+    <CommandBinding Command="ApplicationCommands.Undo" Executed="UndoExecuted"/>
+    <CommandBinding Command="ApplicationCommands.Redo" Executed="RedoExecuted"/>
     <CommandBinding Command="{x:Static local:MainWindow.SubscribeCommand}" Executed="SubscribeExecuted"/>
     <CommandBinding Command="{x:Static local:MainWindow.ImportCommand}" Executed="ImportExecuted"/>
     <CommandBinding Command="{x:Static local:MainWindow.OpenErrorLogCommand}" Executed="OpenErrorLogExecuted"/>
@@ -35,12 +37,15 @@
     </Grid.ColumnDefinitions>
     <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" IsMainMenu="True">
       <MenuItem Header="_File">
-        <MenuItem Header="_Subscribe" Command="{x:Static local:MainWindow.SubscribeCommand}"/>
         <MenuItem Header="_Import" Command="{x:Static local:MainWindow.ImportCommand}"/>
+        <MenuItem Header="_Error Log" Command="{x:Static local:MainWindow.OpenErrorLogCommand}"/>
         <MenuItem Header="_Close" Command="ApplicationCommands.Close"></MenuItem>
       </MenuItem>
-      <MenuItem Header="_Tools">
-        <MenuItem Header="_Error Log" Command="{x:Static local:MainWindow.OpenErrorLogCommand}"/>
+      <MenuItem Header="_Edit">
+        <MenuItem Header="{Binding UndoDescription}" IsEnabled="{Binding UndoEnabled}" Command="ApplicationCommands.Undo"/>
+        <MenuItem Header="{Binding RedoDescription}" IsEnabled="{Binding RedoEnabled}" Command="ApplicationCommands.Redo"/>
+        <MenuItem Header="_Subscribe" Command="{x:Static local:MainWindow.SubscribeCommand}"/>
+        <MenuItem Header="_Unsubscribe" IsEnabled="{Binding SubscriptionSelected}" Click="UnsubscribeSubscription"/>
       </MenuItem>
       <MenuItem Header="_Help">
         <MenuItem Header="_About" Command="{x:Static local:MainWindow.AboutCommand}"/>

@@ -59,6 +59,7 @@
     </Compile>
     <Compile Include="EntryViewModel.cs" />
     <Compile Include="ErrorViewModel.cs" />
+    <Compile Include="Performable.cs" />
     <Compile Include="RenderHTML.cs" />
     <Compile Include="SubscriptionEditor.xaml.cs">
       <DependentUpon>SubscriptionEditor.xaml</DependentUpon>
