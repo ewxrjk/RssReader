@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Media;
 
 namespace RssReader
 {
@@ -57,7 +58,9 @@ namespace RssReader
     {
       get
       {
-        if (UnreadEntries > 0) {
+        if (Subscription.Error != null) {
+          return string.Format(Subscription.Error.Message);
+        } else if (UnreadEntries > 0) {
           return string.Format("{0} ({1} unread)", Subscription.Title, UnreadEntries);
         } else {
           return Subscription.Title;
@@ -80,6 +83,14 @@ namespace RssReader
       get
       {
         return UnreadEntries > 0 ? FontWeights.Bold : FontWeights.Normal;
+      }
+    }
+
+    public Brush TitleBrush
+    {
+      get
+      {
+        return Subscription.Error == null ? Brushes.Black : Brushes.Red;
       }
     }
 
@@ -142,10 +153,15 @@ namespace RssReader
       switch (e.PropertyName) {
         case "Title":
           OnPropertyChanged(e.PropertyName);
+          OnPropertyChanged("TitleTooltip");
           break;
         case "PublicURI":
           OnPropertyChanged(e.PropertyName);
           OnPropertyChanged("CanReadOnline");
+          break;
+        case "Error":
+          OnPropertyChanged("TitleBrush");
+          OnPropertyChanged("TitleTooltip");
           break;
       }
     }

@@ -52,7 +52,7 @@
       <ListBox Name="SubscriptionsWidget" ItemsSource="{Binding Path=Subscriptions.Subscriptions}" SelectionChanged="SelectSubscription">
         <ListBox.ItemTemplate>
           <DataTemplate>
-            <TextBlock Text="{Binding Title}" FontWeight="{Binding TitleWeight}" ToolTip="{Binding TitleTooltip}" ContextMenu="{StaticResource SubscriptionContextMenu}"/>
+            <TextBlock Text="{Binding Title}" FontWeight="{Binding TitleWeight}" ToolTip="{Binding TitleTooltip}" ContextMenu="{StaticResource SubscriptionContextMenu}" Foreground="{Binding TitleBrush}"/>
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
