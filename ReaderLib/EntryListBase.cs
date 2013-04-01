@@ -23,7 +23,7 @@ namespace ReaderLib
   /// </list>
   /// </remarks>
   /// TODO kind of overdesigned now we only have one type of entry class!
-  public class EntryListBase<ET> : IDirtyable where ET : Entry, new()
+  public class EntryListBase : IDirtyable
   {
     public EntryListBase()
     {
@@ -34,7 +34,7 @@ namespace ReaderLib
     /// The collection of entries
     /// </summary>
     [XmlIgnore]
-    public Dictionary<string, ET> Entries = new Dictionary<string, ET>();
+    public Dictionary<string, Entry> Entries = new Dictionary<string, Entry>();
 
     /// <summary>
     /// Parent subscription object
@@ -96,7 +96,7 @@ namespace ReaderLib
     /// Load component contents
     /// </summary>
     /// <returns></returns>
-    public static T Load<T>(Subscription sub, string path = null) where T : EntryListBase<ET>, new()
+    public static T Load<T>(Subscription sub, string path = null) where T : EntryListBase, new()
     {
       if (path == null && sub.Parent != null) {
         path = Filename(sub);
@@ -111,7 +111,7 @@ namespace ReaderLib
         newComponent = new T();
       }
       newComponent.Parent = sub;
-      foreach (ET entry in newComponent.Entries.Values) {
+      foreach (Entry entry in newComponent.Entries.Values) {
         entry.Parent = sub;
         entry.Container = newComponent;
       }
@@ -139,7 +139,7 @@ namespace ReaderLib
     /// need it to be serialized as a dictionary since each entry knows its own key
     /// anyway.</para></remarks>
     [XmlElement("Entry")]
-    public ET[] ProxyEntries
+    public Entry[] ProxyEntries
     {
       get
       {
@@ -147,7 +147,7 @@ namespace ReaderLib
       }
       set
       {
-        foreach (ET e in value) {
+        foreach (Entry e in value) {
           Entries[e.Identity] = e;
         }
       }

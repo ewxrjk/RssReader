@@ -13,7 +13,7 @@ namespace ReaderLib
   /// <summary>
   /// Data for all the entries in a subscription
   /// </summary>
-  public class EntryList: EntryListBase<Entry>, INotifyPropertyChanged
+  public class EntryList: EntryListBase, INotifyPropertyChanged
   {
 
     #region Public Properties
@@ -51,7 +51,7 @@ namespace ReaderLib
     /// <returns></returns>
     public static EntryList Load(Subscription parent, string path = null)
     {
-      return EntryListBase<Entry>.Load<EntryList>(parent, path);
+      return EntryListBase.Load<EntryList>(parent, path);
     }
 
     #endregion
