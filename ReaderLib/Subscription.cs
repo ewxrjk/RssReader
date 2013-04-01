@@ -93,7 +93,6 @@ namespace ReaderLib
     }
 
     [XmlIgnore]
-    [UserVisible(Description = "Last error", Modifiable = false, Priority = 257)]
     public Exception Error
     {
       get { return _Error; }
@@ -102,7 +101,18 @@ namespace ReaderLib
         if (_Error != value) {
           _Error = value;
           OnPropertyChanged();
+          OnPropertyChanged("ErrorString");
         }
+      }
+    }
+
+    [XmlIgnore]
+    [UserVisible(Description = "Last error", Modifiable = false, Priority = 257)]
+    public string ErrorString
+    {
+      get
+      {
+        return _Error.Message;
       }
     }
 
