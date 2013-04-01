@@ -59,7 +59,7 @@ namespace RssReader
       get
       {
         if (Subscription.Error != null) {
-          return string.Format(Subscription.Error.Message);
+          return Subscription.Error.Message;
         } else if (UnreadEntries > 0) {
           return string.Format("{0} ({1} unread)", Subscription.Title, UnreadEntries);
         } else {

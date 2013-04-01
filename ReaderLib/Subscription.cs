@@ -112,7 +112,7 @@ namespace ReaderLib
     {
       get
       {
-        return _Error.Message;
+        return _Error != null ? _Error.Message : "";
       }
     }
 
