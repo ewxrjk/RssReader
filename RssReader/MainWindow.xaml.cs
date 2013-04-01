@@ -128,7 +128,15 @@ namespace RssReader
 
     private void SubscribeExecuted(object sender, ExecutedRoutedEventArgs e)
     {
-      Error(new Exception("TODO"));
+      SubscriptionEditor editor = new SubscriptionEditor()
+      {
+        Subscription = new WebSubscription(),
+        Owner = this,
+      };
+      editor.ShowDialog();
+      if (editor.Accept) {
+        _Subscriptions.Add(editor.Subscription);
+      }
     }
 
     private void ImportExecuted(object sender, ExecutedRoutedEventArgs e)

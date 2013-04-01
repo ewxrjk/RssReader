@@ -5,14 +5,20 @@
   <Grid Name="GridWidget">
     <Grid.RowDefinitions>
       <RowDefinition Height="auto"/>
+      <RowDefinition Height="auto"/>
+      <RowDefinition Height="auto"/>
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="auto"/>
       <ColumnDefinition Width="*"/>
     </Grid.ColumnDefinitions>
-    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Name="ButtonContainer">
-      <Button Click="Reset" Margin="2" Width="64">Reset</Button>
-      <Button Click="OK" Margin="2" Width="64" IsDefault="True">OK</Button>
+    <Label Grid.Row="0" Grid.Column="0" Name="NewURILabel" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="2">Enter URI</Label>
+    <TextBox Grid.Row="0" Grid.Column="1" Name="NewURI" MinWidth="384" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
+    <Label Grid.Row="1" Grid.Column="1" Name="NewURIError" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="2" Foreground="Red" Content="{Binding LastError}"/>
+    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Name="ButtonContainer">
+      <Button Click="Reset" Margin="2" Width="64" Visibility="{Binding ResetVisibility}">Reset</Button>
+      <Button Click="Check" Margin="2" Width="64" Visibility="{Binding CheckVisibility}" IsEnabled="{Binding Checkable}">Check</Button>
+      <Button Click="OK" Margin="2" Width="64" IsDefault="True" IsEnabled="{Binding Acceptable}" Content="{Binding OKText}"></Button>
     </StackPanel>
   </Grid>
 </Window>
