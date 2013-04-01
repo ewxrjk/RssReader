@@ -1,7 +1,7 @@
 ﻿<Window x:Class="RssReader.About"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="About RssReader"
+        Title="About HalfMoon"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
@@ -15,7 +15,7 @@
       <RowDefinition Height="auto"></RowDefinition>
       <RowDefinition Height="auto"></RowDefinition>
     </Grid.RowDefinitions>
-    <TextBlock Grid.Column="0" Grid.Row="0" FontSize="32" Margin="4" TextAlignment="Center">RSS Reader</TextBlock>
+    <TextBlock Grid.Column="0" Grid.Row="0" FontSize="32" Margin="4" TextAlignment="Center">HalfMoon RSS Reader</TextBlock>
     <TextBlock Grid.Column="0" Grid.Row="1" FontSize="12" Margin="4" TextAlignment="Center">
       <Hyperlink Name="link" NavigateUri="http://www.greenend.org.uk/rjk/" RequestNavigate="VisitHomePage">http://www.greenend.org.uk/rjk/</Hyperlink> <!-- TODO -->
     </TextBlock>

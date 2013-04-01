@@ -5,7 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaderLib", "ReaderLib\Read
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{A416912A-45C5-4F17-A02C-EACEF2599627}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RssReader", "RssReader\RssReader.csproj", "{671870AE-27C0-49FC-AC20-FEBC8B78DD44}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HalfMoon", "RssReader\HalfMoon.csproj", "{671870AE-27C0-49FC-AC20-FEBC8B78DD44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
