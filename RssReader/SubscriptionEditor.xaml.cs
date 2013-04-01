@@ -315,7 +315,6 @@ namespace RssReader
 
     private void CheckError(Exception error)
     {
-      Console.WriteLine("CheckError\n{0}", error.ToString());
       CheckFailed = error.Message;
     }
 
