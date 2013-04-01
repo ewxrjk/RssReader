@@ -69,13 +69,15 @@ namespace ReaderLib
     /// <param name="subscription"></param>
     public void Add(Subscription subscription)
     {
-      subscription.Parent = this;
-      subscription.PropertyChanged += this.ChildPropertyChanged;
-      _Subscriptions.Add(subscription);
-      Dirty = true;
-      SubscriptionAddedEventHandler handler = SubscriptionAdded;
-      if (handler != null) {
-        handler(subscription);
+      if (!Contains(subscription)) {
+        subscription.Parent = this;
+        subscription.PropertyChanged += this.ChildPropertyChanged;
+        _Subscriptions.Add(subscription);
+        Dirty = true;
+        SubscriptionAddedEventHandler handler = SubscriptionAdded;
+        if (handler != null) {
+          handler(subscription);
+        }
       }
     }
 
@@ -98,6 +100,16 @@ namespace ReaderLib
           handler(index);
         }
       }
+    }
+
+    /// <summary>
+    /// Test whether a subscription is already present
+    /// </summary>
+    /// <param name="subscription"></param>
+    /// <returns></returns>
+    public bool Contains(Subscription subscription)
+    {
+      return _Subscriptions.FindIndex(candidate => candidate == subscription) >= 0;
     }
 
     #endregion
