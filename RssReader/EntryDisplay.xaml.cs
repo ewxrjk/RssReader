@@ -74,7 +74,7 @@ namespace RssReader
     private void EntryExpanded(object sender, RoutedEventArgs e)
     {
       // We only render the content when the user wants to read it
-      // - rendering all the content for an entire feed up front is
+      // - rendering all the content for an entire subscription up front is
       // much too expensive.
       if (!HasBody()) {
         Model.PropertyChanged += EntryPropertyChanged;

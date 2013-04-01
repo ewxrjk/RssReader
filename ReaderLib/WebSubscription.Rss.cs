@@ -118,7 +118,7 @@ namespace ReaderLib
     /// <param name="item"></param>
     /// <returns></returns>
     /// <remarks>
-    /// <para>If the feed doesn't provide a GUID, or a link, and
+    /// <para>If the subscription doesn't provide a GUID, or a link, and
     /// changes the description, then the article will be
     /// duplicated.</para>
     /// </remarks>

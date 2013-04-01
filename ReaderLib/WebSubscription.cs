@@ -71,7 +71,7 @@ namespace ReaderLib
     /// <summary>
     /// The URI of the subscription
     /// </summary>
-    [UserVisible(Description = "Feed URI", Modifiable = true, Priority = 0, Type = "URI")]
+    [UserVisible(Description = "Subscription URI", Modifiable = true, Priority = 0, Type = "URI")]
     public string URI
     {
       get
@@ -116,7 +116,7 @@ namespace ReaderLib
     private string _PublicURI;
 
     [XmlIgnore]
-    [UserVisible(Description = "Feed type", Modifiable = false, Priority = 257)]
+    [UserVisible(Description = "Subscription type", Modifiable = false, Priority = 257)]
     public string Type
     {
       get
@@ -200,7 +200,7 @@ namespace ReaderLib
           UpdateFromAtom(root, dispatch, error);
           break;
         default:
-          throw new SubscriptionParsingException(string.Format("Unrecognized web feed type: {0}", root.Name.LocalName))
+          throw new SubscriptionParsingException(string.Format("Unrecognized web subscription type: {0}", root.Name.LocalName))
           {
             Subscription = this
           };
@@ -279,7 +279,7 @@ namespace ReaderLib
 
     #endregion
 
-    #region Configuring New Feeds
+    #region Configuring New Subscriptions
 
     public void Configure(Action<Action> dispatch, Action<Exception> error, Uri URI, bool acceptHTML = true)
     {
@@ -290,7 +290,7 @@ namespace ReaderLib
           ConfigureWithHtml(dispatch, error, URI, response);
           return;
         }
-        ConfigureWithFeed(dispatch, error, URI, response);
+        ConfigureWithSubscription(dispatch, error, URI, response);
       }
       catch (Exception e) {
         dispatch(() =>
@@ -323,11 +323,11 @@ namespace ReaderLib
            && (link.Attributes["type"].ToLowerInvariant() == "application/rss+xml"
                || link.Attributes["type"].ToLowerInvariant() == "application/x.atom+xml")
            && link.Attributes.ContainsKey("href")) {
-          Uri FeedUri;
-          if (Uri.TryCreate(link.Attributes["href"], UriKind.Absolute, out FeedUri)
-              || Uri.TryCreate(URI, link.Attributes["href"], out FeedUri)) {
+          Uri SubscriptionUri;
+          if (Uri.TryCreate(link.Attributes["href"], UriKind.Absolute, out SubscriptionUri)
+              || Uri.TryCreate(URI, link.Attributes["href"], out SubscriptionUri)) {
             try {
-              Configure(dispatch, error, FeedUri, false);
+              Configure(dispatch, error, SubscriptionUri, false);
               return; // accept the first one that actually works
             }
             catch (Exception e) {
@@ -341,10 +341,10 @@ namespace ReaderLib
       if (firstError != null) {
         throw firstError;
       }
-      throw new SubscriptionParsingException(string.Format("No feed link found in HTML"));
+      throw new SubscriptionParsingException(string.Format("No subscription link found in HTML"));
     }
 
-    private void ConfigureWithFeed(Action<Action> dispatch, Action<Exception> error, Uri URI, WebResponse response)
+    private void ConfigureWithSubscription(Action<Action> dispatch, Action<Exception> error, Uri URI, WebResponse response)
     {
       using (StreamReader reader = new StreamReader(response.GetResponseStream(), Tools.GetEncoding(response))) {
         XDocument doc = XDocument.Load(reader);
@@ -360,7 +360,7 @@ namespace ReaderLib
             Update(dispatch, error);
             break;
           default:
-            throw new SubscriptionParsingException(string.Format("Unrecognized web feed type: {0}", root.Name.LocalName))
+            throw new SubscriptionParsingException(string.Format("Unrecognized web subscription type: {0}", root.Name.LocalName))
             {
               Subscription = this
             };
