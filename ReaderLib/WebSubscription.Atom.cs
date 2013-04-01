@@ -18,7 +18,7 @@ namespace ReaderLib
 
     private void UpdateFromAtom(XElement atom, Action<Action> dispatch, Action<Exception> error)
     {
-      string title = (string)GetMandatoryElement(atom, Atom + "title", dispatch, error); // TODO might be HTML
+      string title = (string)GetMandatoryElement(atom, Atom + "title"); // TODO might be HTML
       string publicUri = GetLinkAtom(atom);
       IEnumerable<XElement> items = atom.Elements(Atom + "entry").Reverse();
       dispatch(() =>
@@ -50,7 +50,7 @@ namespace ReaderLib
     {
       entry.URI = GetLinkAtom(element);
       entry.Title = (string)element.Element(Atom + "title"); // TODO the title might be HTML.
-      string updated = (string)GetMandatoryElement(element, Atom + "updated", error);
+      string updated = (string)GetMandatoryElement(element, Atom + "updated");
       try {
         entry.Date = Tools.RFC3339Date(updated);
       }

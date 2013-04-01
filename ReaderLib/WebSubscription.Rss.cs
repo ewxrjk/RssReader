@@ -14,32 +14,58 @@ namespace ReaderLib
 {
   public partial class WebSubscription
   {
+    static private XNamespace RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    static private XNamespace RSS = "http://purl.org/rss/1.0/";
+    static private XNamespace RSSContent = "http://purl.org/rss/1.0/modules/content/";
+    static private XNamespace DcmiMetadata = "http://purl.org/dc/elements/1.1";
 
     private void UpdateFromRss(XElement rss, Action<Action> dispatch, Action<Exception> error)
     {
-      XElement channel = GetMandatoryElement(rss, "channel", dispatch, error);
-      // Mandatory <channel> subelements
-      string title = (string)GetMandatoryElement(channel, "title", dispatch, error);
-      string description = (string)GetMandatoryElement(channel, "description", dispatch, error);
-      string publicURI = (string)GetMandatoryElement(channel, "link", dispatch, error);
+      string type;
+      XElement channel;
+      if((channel = rss.Element("channel")) != null) {
+        type = "RSS 2.0";
+      } else if((channel = rss.Element(RSS + "channel")) != null) {
+        type = "RSS (RDF)";
+      } else {
+        throw new SubscriptionParsingException("No <channel> element") { Subscription = this };
+      }
+      // Mandatory <channel> subelements (actually we cope gracefuly without now)
+      XElement title = channel.Element("title") ?? channel.Element(RSS + "title");
+      XElement description = channel.Element("description") ?? channel.Element(RSS + "description");
+      XElement link = channel.Element("link") ?? channel.Element(RSS + "link");
       // Optional <channel> subelements
       XElement ttl = channel.Element("ttl");
       int ttlValue = 0;
       int.TryParse((string)ttl, out ttlValue);
+      // Item list isn't in a consistent place
+      IEnumerable<XElement> items = channel.Elements("item");
+      if (items.Count() == 0) {
+        items = rss.Elements(RSS + "item");
+      }
       // In order to assign serials correctly, we need to walk
       // the item list in reverse.
-      IEnumerable<XElement> items = channel.Elements("item").Reverse();
+      IEnumerable<XElement> ritems = items.Reverse();
       dispatch(() =>
       {
         try {
-          Title = title;
-          Description = description;
-          PublicURI = publicURI;
+          Title = title != null ? (string)title : "";
+          Description = description != null ? (string)description : "";
+          PublicURI = link != null ? (string)link : "";
           TTL = ttlValue;
-          foreach (XElement item in items) {
-            UpdateEntry(item, GetUniqueIdFromRss(item, error), UpdateFromRss, error);
+          foreach (XElement item in ritems) {
+            try {
+              UpdateEntry(item, GetUniqueIdFromRss(item, error), UpdateFromRss, error);
+            }
+            catch (SubscriptionException se) {
+              se.Subscription = this;
+              error(se);
+            }
+            catch (Exception e) {
+              error(new SubscriptionParsingException(e.Message, e) { Subscription = this });
+            }
           }
-          Type = "RSS";
+          Type = type;
           Error = null;
         }
         catch (SubscriptionException se) {
@@ -58,30 +84,32 @@ namespace ReaderLib
 
     private void UpdateFromRss(WebEntry entry, XElement item, Action<Exception> error)
     {
-      XElement title = item.Element("title");
-      XElement description = item.Element("description");
-      XElement encoded = item.Element(XName.Get("encoded", "http://purl.org/rss/1.0/modules/content/"));
+      XElement title = item.Element("title") ?? item.Element(RSS + "title");
+      XElement description = item.Element(RSSContent + "encoded")
+                             ?? item.Element("description")
+                             ?? item.Element(RSS + "description");
       XElement pubDate = item.Element("pubDate");
-      string ItemURI = GetRssItemUri(item);
+      XElement dcDate = item.Element(DcmiMetadata + "date");
       entry.Title = (title != null ? (string)title : null);
-      if (encoded != null) {
-        entry.Description = (string)encoded;
-      }
-      else if (description != null) {
-        entry.Description = (string)description;
-      }
-      else {
-        entry.Description = null;
-      }
-      entry.URI = ItemURI;
-      try {
-        if (pubDate != null) {
+      entry.Description = description != null ? (string)description : null;
+      entry.URI = GetRssItemUri(item);
+      if (pubDate != null) {
+        try {
           entry.Date = Tools.RFC822Date((string)pubDate);
         }
+        catch (Exception e) {
+          error(new SubscriptionParsingException(string.Format("Invalid date string “{0}”", (string)pubDate),
+                                                 e) { Subscription = this });
+        }
       }
-      catch (Exception e) {
-        error(new SubscriptionParsingException(string.Format("Invalid date string “{0}”", (string)pubDate),
-                                               e) { Subscription = this });
+      else if (dcDate != null) {
+        try {
+          entry.Date = Tools.RFC3339Date((string)dcDate);
+        }
+        catch (Exception e) {
+          error(new SubscriptionParsingException(string.Format("Invalid date string “{0}”", (string)dcDate),
+                                                 e) { Subscription = this });
+        }
       }
       // TODO author, category, comments, enclosure, source 
     }
@@ -89,7 +117,7 @@ namespace ReaderLib
     static private string GetRssItemUri(XElement item)
     {
       // If the <guid> advertizes itself as a link, use that
-      XElement guid = item.Element("guid");
+      XElement guid = item.Element("guid") ?? item.Element(RSS + "guid");
       if (guid != null) {
         XAttribute isPermaLink = guid.Attribute("isPermaLink");
         if (isPermaLink != null && (string)isPermaLink == "true") {
@@ -97,9 +125,14 @@ namespace ReaderLib
         }
       }
       // Otherwise if <link> is present use that
-      XElement link = item.Element("link");
+      XElement link = item.Element("link") ?? item.Element(RSS + "link");
       if (link != null) {
         return (string)link;
+      }
+      // Maybe there's an RDF about attribute
+      XAttribute about = item.Attribute(RDF + "about");
+      if (about != null) {
+        return about.Value;
       }
       // Otherwise see if <guid> looks like a URI
       // (this is out of spec but even the sample RSS needs it!)
@@ -137,10 +170,15 @@ namespace ReaderLib
           unique = (string)link;
         }
       }
+      // Maybe there's an RDF about attribute
+      XAttribute about = item.Attribute(RDF + "about");
+      if (about != null) {
+        return about.Value;
+      }
       // If we still don't have a unique ID use <description>
       // (one of <link> and <description> are required in RSS)
       if (unique == null) {
-        unique = (string)GetMandatoryElement(item, "description", error);
+        unique = (string)GetMandatoryElement(item, "description");
       }
       // Convert unique string to something managable.  We include
       // subscription ID to ensure global uniqueness.

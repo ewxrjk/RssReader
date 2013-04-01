@@ -194,6 +194,7 @@ namespace ReaderLib
       XElement root = doc.Root;
       switch (root.Name.LocalName) {
         case "rss":
+        case "RDF":
           UpdateFromRss(root, dispatch, error);
           break;
         case "feed":
@@ -243,31 +244,11 @@ namespace ReaderLib
 
     }
 
-    private XElement GetMandatoryElement(XElement container, XName name,
-                                         Action<Action> dispatch, Action<Exception> error)
+    static private XElement GetMandatoryElement(XElement container, XName name)
     {
       XElement element = container.Element(name);
       if (element == null) {
-        dispatch(() =>
-        {
-          error(new SubscriptionParsingException(string.Format("Missing <{0}> element", name))
-          {
-            Subscription = this,
-          });
-        });
-      }
-      return element;
-    }
-
-    private XElement GetMandatoryElement(XElement container, XName name,
-                                         Action<Exception> error)
-    {
-      XElement element = container.Element(name);
-      if (element == null) {
-        error(new SubscriptionParsingException(string.Format("Missing <{0}> element", name))
-        {
-          Subscription = this,
-        });
+        throw new SubscriptionParsingException(string.Format("Missing <{0}> element", name));
       }
       return element;
     }
@@ -352,6 +333,7 @@ namespace ReaderLib
         switch (root.Name.LocalName) {
           case "rss":
           case "feed": // looks like atom
+          case "RDF":
             dispatch(() =>
             {
               this.URI = URI.ToString();
