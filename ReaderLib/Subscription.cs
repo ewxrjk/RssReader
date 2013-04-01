@@ -168,7 +168,7 @@ namespace ReaderLib
     /// <summary>
     /// Entry data
     /// </summary>
-    /// <remarks>Caution!  Call <c>Initialize()</c> before use.</remarks>
+    /// <remarks>Caution!  Call <c>Load()</c> before use.</remarks>
     protected EntryList _Entries;
 
     #endregion
@@ -200,7 +200,7 @@ namespace ReaderLib
     /// Ensure that <c>_EntryData</c> and <c>_EntryState</c> are set
     /// </summary>
     /// <remarks>
-    /// This is the only place _Entryies should be set.
+    /// This is the only place _Entries should be set.
     /// Applications shouldn't need to call this.</remarks>
     public void Load()
     {

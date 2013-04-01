@@ -207,7 +207,7 @@ namespace ReaderLib
     }
 
     private void UpdateEntry(XElement item,
-                             string id, 
+                             string id,
                              Action<WebEntry, XElement, Action<Exception>> update,
                              Action<Exception> error)
     {

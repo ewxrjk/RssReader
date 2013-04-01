@@ -56,7 +56,7 @@ namespace ReaderLib
     /// <returns></returns>
     protected static string Filename(Subscription sub)
     {
-      return Path.Combine(sub.Directory(), string.Format("{0}.xml",  sub.Identity.ToString()));
+      return Path.Combine(sub.Directory(), string.Format("{0}.xml", sub.Identity.ToString()));
     }
 
     /// <summary>
