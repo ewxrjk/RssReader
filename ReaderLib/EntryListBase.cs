@@ -73,7 +73,7 @@ namespace ReaderLib
     /// </summary>
     public void Save(bool force = false)
     {
-      if (Dirty || force) {
+      if (Parent.Parent != null && (Dirty || force)) {
         Directory.CreateDirectory(Parent.Directory());
         Save(Filename());
         Dirty = false;
@@ -96,10 +96,10 @@ namespace ReaderLib
     /// Load component contents
     /// </summary>
     /// <returns></returns>
-    public static T Load<T>(Subscription parent, string path = null) where T : EntryListBase<ET>, new()
+    public static T Load<T>(Subscription sub, string path = null) where T : EntryListBase<ET>, new()
     {
-      if (path == null) {
-        path = Filename(parent);
+      if (path == null && sub.Parent != null) {
+        path = Filename(sub);
       }
       T newComponent;
       if (path != null && File.Exists(path)) {
@@ -110,9 +110,9 @@ namespace ReaderLib
       else {
         newComponent = new T();
       }
-      newComponent.Parent = parent;
+      newComponent.Parent = sub;
       foreach (ET entry in newComponent.Entries.Values) {
-        entry.Parent = parent;
+        entry.Parent = sub;
         entry.Container = newComponent;
       }
       return newComponent;
