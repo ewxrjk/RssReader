@@ -247,6 +247,16 @@ namespace ReaderLib
       _Entries.Save(path);
     }
 
+    /// <summary>
+    /// Junk state and reload it
+    /// </summary>
+    /// <remarks>Used in initial subscription.</remarks>
+    public void Reset()
+    {
+      _Entries = null;
+      Load();
+    }
+
     #endregion
 
     #region Files
