@@ -43,7 +43,6 @@
     <Compile Include="HTML.Parser.cs" />
     <Compile Include="HTML.Parser.Elements.cs" />
     <Compile Include="HTML.Parser.Entities.cs" />
-    <Compile Include="EntryBase.cs" />
     <Compile Include="Entry.cs" />
     <Compile Include="EntryList.cs" />
     <Compile Include="GoogleSubscriptions.cs" />

@@ -23,7 +23,7 @@ namespace ReaderLib
   /// </list>
   /// </remarks>
   /// TODO kind of overdesigned now we only have one type of entry class!
-  public class EntryListBase<ET> : IDirtyable where ET : EntryBase, new()
+  public class EntryListBase<ET> : IDirtyable where ET : Entry, new()
   {
     public EntryListBase()
     {
