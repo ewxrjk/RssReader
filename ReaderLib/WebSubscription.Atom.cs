@@ -18,13 +18,13 @@ namespace ReaderLib
 
     private void UpdateFromAtom(XElement atom, Action<Action> dispatch, Action<Exception> error)
     {
-      string title = (string)GetMandatoryElement(atom, Atom + "title"); // TODO might be HTML
+      XElement title = atom.Element(Atom + "title");
       string publicUri = GetLinkAtom(atom);
       IEnumerable<XElement> items = atom.Elements(Atom + "entry").Reverse();
       dispatch(() =>
       {
         try {
-          Title = title;
+          Title = title != null ? (string)title : "";
           PublicURI = publicUri;
           foreach (XElement item in items) {
             UpdateEntry(item, HashId((string)item.Element(Atom + "id")), UpdateFromAtom, error);
@@ -93,7 +93,7 @@ namespace ReaderLib
           }
         }
       }
-      return null;
+      return "";
     }
   }
 }

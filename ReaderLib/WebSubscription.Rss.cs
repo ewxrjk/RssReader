@@ -90,8 +90,8 @@ namespace ReaderLib
                              ?? item.Element(RSS + "description");
       XElement pubDate = item.Element("pubDate");
       XElement dcDate = item.Element(DcmiMetadata + "date");
-      entry.Title = (title != null ? (string)title : null);
-      entry.Description = description != null ? (string)description : null;
+      entry.Title = (title != null ? (string)title : "");
+      entry.Description = description != null ? (string)description : "";
       entry.URI = GetRssItemUri(item);
       if (pubDate != null) {
         try {
