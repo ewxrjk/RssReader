@@ -1,0 +1,47 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:syn="http://purl.org/rss/1.0/modules/syndication/">
+<channel rdf:about="http://lwn.net/headlines/rss">
+<title>LWN.net</title>
+<link>http://lwn.net</link>
+<description>
+ LWN.net is a ...
+    </description>
+<syn:updatePeriod>hourly</syn:updatePeriod>
+<syn:updateFrequency>2</syn:updateFrequency>
+<items>
+<rdf:Seq>
+<rdf:li resource="http://lwn.net/Articles/546186/rss"/>
+<rdf:li resource="http://lwn.net/Articles/546120/rss"/>
+<rdf:li resource="http://lwn.net/Articles/545918/rss"/>
+</rdf:Seq>
+</items>
+</channel>
+<item rdf:about="http://lwn.net/Articles/546186/rss">
+<title>Ubuntu 13.04 (Raring Ringtail) Beta 2 released</title>
+<link>http://lwn.net/Articles/546186/rss</link>
+<dc:date>2013-04-05T17:28:00+00:00</dc:date>
+<dc:creator>corbet</dc:creator>
+<description>
+      The second and final Ubuntu 13.04 ...
+</description>
+</item>
+<item rdf:about="http://lwn.net/Articles/546120/rss">
+<title>Friday's security updates</title>
+<link>http://lwn.net/Articles/546120/rss</link>
+<dc:date>2013-04-05T14:53:13+00:00</dc:date>
+<dc:creator>n8willis</dc:creator>
+<description>
+      &lt;p&gt;
+&lt;b&gt;Fedora&lt;/b&gt; has updated ...
+ </description>
+</item>
+<item rdf:about="http://lwn.net/Articles/545918/rss">
+<title>Thursday's security updates</title>
+<link>http://lwn.net/Articles/545918/rss</link>
+<dc:date>2013-04-04T16:10:58+00:00</dc:date>
+<dc:creator>jake</dc:creator>
+<description>
+      &lt;p&gt;
+&lt;b&gt;Debian&lt;/b&gt; has updated ...
+</description>
+</item>
+</rdf:RDF>
