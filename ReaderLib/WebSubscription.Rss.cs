@@ -17,7 +17,7 @@ namespace ReaderLib
     static private XNamespace RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     static private XNamespace RSS = "http://purl.org/rss/1.0/";
     static private XNamespace RSSContent = "http://purl.org/rss/1.0/modules/content/";
-    static private XNamespace DcmiMetadata = "http://purl.org/dc/elements/1.1";
+    static private XNamespace DcmiMetadata = "http://purl.org/dc/elements/1.1/";
 
     private void UpdateFromRss(XElement rss, Action<Action> dispatch, Action<Exception> error)
     {
