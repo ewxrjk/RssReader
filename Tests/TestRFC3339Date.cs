@@ -16,6 +16,8 @@ namespace Tests
                       Tools.RFC3339Date("1990-01-01T00:00:00+00:00"));
       Assert.AreEqual(new DateTime(2011, 6, 3, 1, 2, 4, DateTimeKind.Utc),
                       Tools.RFC3339Date("2011-06-03T01:02:04Z"));
+      Assert.AreEqual(new DateTime(2013, 4, 5, 17, 28, 0, DateTimeKind.Utc),
+                      Tools.RFC3339Date("2013-04-05T17:28:00+00:00"));
     }
 
     [TestMethod]
