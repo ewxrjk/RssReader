@@ -92,7 +92,7 @@ namespace Tests
             break;
           case 2:
             Assert.AreEqual("http://liftoff.msfc.nasa.gov/2003/05/30.html#item572", data.URI);
-            Assert.AreEqual(null, data.Title);
+            Assert.AreEqual("", data.Title);
             Assert.AreEqual("Sky watchers in Europe, Asia, and parts of Alaska and Canada will experience a <a href=\"http://science.nasa.gov/headlines/y2003/30may_solareclipse.htm\">partial eclipse of the Sun</a> on Saturday, May 31st.",
                             data.Description);
             Assert.AreEqual(new DateTime(2003, 5, 30, 11, 6, 42, DateTimeKind.Utc), data.Date);
