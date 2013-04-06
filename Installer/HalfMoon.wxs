@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+
+  <Product Name='HalfMoon 1.0' Id='2749E1A9-C973-4D11-A7A9-1AA45520C7DA' UpgradeCode='35748251-1425-428E-A1A1-8BF295457C74'
+    Language='1033' Codepage='1252' Version='1.0.0' Manufacturer='Greenend'>
+
+    <Package Id='*' Keywords='Installer' Description="HalfMoon Installer"
+      Comments='RSS Reader' Manufacturer='Greenend'
+      InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+      
+    <Media Id='1' Cabinet='HalfMoon.cab' EmbedCab='yes' DiskPrompt='CD-ROM #1' />
+    <Property Id='DiskPrompt' Value="HalfMoon [1]" />
+    
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder' Name='PFiles'>
+        <Directory Id='Greenend' Name='Greenend'>
+          <Directory Id='INSTALLDIR' Name='HalfMoon 1.0'>
+            <Component Id='MainExecutable' Guid='FA61835C-FFED-4420-AF50-099138B501A6'>
+              <File Id='HalfMoonEXE' Name='HalfMoon.exe' DiskId='1' Source='..\RssReader\bin\Release\HalfMoon.exe' KeyPath='yes'>
+                <Shortcut Id="startmenuHalfMoon" Directory="ProgramMenuDir" Name="HalfMoon"
+                  WorkingDirectory='INSTALLDIR' Icon="HalfMoon.ico" IconIndex="0" Advertise="yes" />
+                <Shortcut Id="desktopHalfMoon" Directory="DesktopFolder" Name="HalfMoon"
+                  WorkingDirectory='INSTALLDIR' Icon="HalfMoon.ico" IconIndex="0" Advertise="yes" />
+              </File>
+              <File Id="HalfMoonCONFIG" Name='HalfMoon.exe.config' DiskId='1' Source='..\RssReader\bin\Release\HalfMoon.exe.config'/>
+            </Component>
+            <Component Id='Library' Guid='5D9E9726-2149-4D02-B6D5-E1E2DB0E0518'>
+              <File Id="ReaderLibDLL" Name="ReaderLib.dll" DiskId="1" Source="..\RssReader\bin\Release\ReaderLib.dll" KeyPath='yes'/>
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+      
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="HalfMoon">
+          <Component Id="ProgramMenuDir" Guid="2C2DFDB4-4311-4DEA-8DDD-3414808089EF">
+            <RemoveFolder Id='ProgramMenuDir' On='uninstall' />
+            <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Type='string' Value='' KeyPath='yes' />
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+    
+    <Feature Id='Complete' Level='1'>
+      <ComponentRef Id='MainExecutable'/>
+      <ComponentRef Id='Library'/>
+      <ComponentRef Id='ProgramMenuDir'/>
+    </Feature>
+    
+    <Icon Id="HalfMoon.ico" SourceFile="..\RssReader\HalfMoon.ico" />
+    
+  </Product>
+</Wix>

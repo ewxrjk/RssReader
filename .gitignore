@@ -4,3 +4,6 @@ obj
 *~
 TestResults
 *.csproj.user
+*.msi
+*.wixobj
+*.wixpdb
