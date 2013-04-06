@@ -22,10 +22,9 @@ namespace ReaderLib
     /// <summary>
     /// Containing list
     /// </summary>
-    /// <remarks>We only need this to set the <c>Dirty</c> flag. Also here in the base
-    /// class we don't know its full type.  Hence the use of an interface.</remarks>
+    /// <remarks>We only need this to set the <c>Dirty</c> flag.</remarks>
     [XmlIgnore]
-    public IDirtyable Container;
+    public EntryList Container;
 
     /// <summary>
     /// Entry title

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
@@ -8,8 +11,30 @@ namespace ReaderLib
   /// <summary>
   /// Data for all the entries in a subscription
   /// </summary>
-  public class EntryList: EntryListBase, INotifyPropertyChanged
+  public class EntryList: INotifyPropertyChanged
   {
+    public EntryList()
+    {
+      Dirty = false;
+    }
+
+    /// <summary>
+    /// The collection of entries
+    /// </summary>
+    [XmlIgnore]
+    public Dictionary<string, Entry> Entries = new Dictionary<string, Entry>();
+
+    /// <summary>
+    /// Parent subscription object
+    /// </summary>
+    [XmlIgnore]
+    public Subscription Parent;
+
+    /// <summary>
+    /// Dirty flag, set when anything changes
+    /// </summary>
+    [XmlIgnore]
+    public bool Dirty { get; set; }
 
     #region Public Properties
 
@@ -34,23 +59,118 @@ namespace ReaderLib
 
     #region Serialization
 
+    #region Infrastructure
+
+    /// <summary>
+    /// Filename for an object of this type
+    /// </summary>
+    /// <returns></returns>
+    private static string Filename(Subscription sub)
+    {
+      return Path.Combine(sub.Directory(), string.Format("{0}.xml", sub.Identity.ToString()));
+    }
+
+    /// <summary>
+    /// Filename for this object
+    /// </summary>
+    /// <returns></returns>
+    private string Filename()
+    {
+      return Filename(Parent);
+    }
+
     /// <summary>
     /// XML serializer for this type
     /// </summary>
     static public XmlSerializer Serializer = new XmlSerializer(typeof(EntryList));
 
+    #endregion
+
+    #region Saving
+
     /// <summary>
-    /// Deserialize from a file
+    /// Save component contents
+    /// </summary>
+    public void Save(bool force = false)
+    {
+      if (Parent.Parent != null && (Dirty || force)) {
+        Directory.CreateDirectory(Parent.Directory());
+        Save(Filename());
+        Dirty = false;
+      }
+    }
+
+    /// <summary>
+    /// Save to a specific path
     /// </summary>
     /// <param name="path"></param>
-    /// <returns></returns>
-    public static EntryList Load(Subscription parent, string path = null)
+    public void Save(string path)
     {
-      return EntryListBase.Load<EntryList>(parent, path);
+      using (StreamWriter sw = new StreamWriter(path)) {
+        Serializer.Serialize(sw, this);
+        sw.Flush();
+      }
     }
 
     #endregion
 
+    #region Loading
+
+    /// <summary>
+    /// Load component contents
+    /// </summary>
+    /// <returns></returns>
+    public static EntryList Load(Subscription sub, string path = null)
+    {
+      if (path == null && sub.Parent != null) {
+        path = Filename(sub);
+      }
+      EntryList newComponent;
+      if (path != null && File.Exists(path)) {
+        using (StreamReader sr = new StreamReader(path)) {
+          newComponent = (EntryList)Serializer.Deserialize(sr);
+        }
+      }
+      else {
+        newComponent = new EntryList();
+      }
+      newComponent.Parent = sub;
+      foreach (Entry entry in newComponent.Entries.Values) {
+        entry.Parent = sub;
+        entry.Container = newComponent;
+      }
+      return newComponent;
+    }
+
+    #endregion
+
+    #endregion
+
+    #region Proxies
+
+    /// <summary>
+    /// XML serialization proxy for Entries
+    /// </summary>
+    /// <remarks>
+    /// <para>Dictionaries aren't serializable.  As it happens we don't actually
+    /// need it to be serialized as a dictionary since each entry knows its own key
+    /// anyway.</para></remarks>
+    [XmlElement("Entry")]
+    public Entry[] ProxyEntries
+    {
+      get
+      {
+        return Entries.Values.ToArray();
+      }
+      set
+      {
+        foreach (Entry e in value) {
+          Entries[e.Identity] = e;
+        }
+      }
+    }
+
+    #endregion
     #region INotifyPropertyChanged
 
     public event PropertyChangedEventHandler PropertyChanged;

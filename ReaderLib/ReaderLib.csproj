@@ -47,13 +47,11 @@
     <Compile Include="EntryList.cs" />
     <Compile Include="GoogleSubscriptions.cs" />
     <Compile Include="HTML.cs" />
-    <Compile Include="IDirtyable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebEntry.cs" />
     <Compile Include="WebSubscription.Atom.cs" />
     <Compile Include="WebSubscription.cs" />
     <Compile Include="Subscription.cs" />
-    <Compile Include="EntryListBase.cs" />
     <Compile Include="SubscriptionException.cs" />
     <Compile Include="SubscriptionFetchingException.cs" />
     <Compile Include="SubscriptionList.cs" />

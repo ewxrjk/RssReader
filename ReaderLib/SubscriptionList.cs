@@ -12,7 +12,7 @@ namespace ReaderLib
   /// <summary>
   /// A list of subscriptions
   /// </summary>
-  public class SubscriptionList : UniquelyIdentifiable, INotifyPropertyChanged, IDirtyable
+  public class SubscriptionList : UniquelyIdentifiable, INotifyPropertyChanged
   {
     public SubscriptionList()
     {
