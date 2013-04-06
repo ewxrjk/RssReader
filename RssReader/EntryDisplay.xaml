@@ -19,7 +19,7 @@
     <Expander.Content>
       <StackPanel Name="Panel">
         <TextBlock>
-          <Hyperlink NavigateUri="{Binding Path=URI, Mode=OneWay}" FontFamily="Global Sans" FontWeight="Bold" FontSize="16" RequestNavigate="RequestedNavigate">
+          <Hyperlink NavigateUri="{Binding Path=URI, Mode=OneWay}" FontFamily="Global Sans" FontWeight="Bold" FontSize="16" RequestNavigate="RequestedNavigate" ToolTip="{Binding Path=URI}">
             <Run Text="{Binding Path=Date, Mode=OneWay}"/>
             <Run Text="{Binding Path=Title, Mode=OneWay}"/>
           </Hyperlink>
