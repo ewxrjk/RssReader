@@ -2,7 +2,7 @@
 all: HalfMoon.msi
 
 HalfMoon.msi: HalfMoon.wixobj
-        light -nologo HalfMoon.wixobj
+        light -ext WixNetFxExtension -nologo HalfMoon.wixobj
         
 HalfMoon.wixobj: HalfMoon.wxs
         candle -nologo HalfMoon.wxs
