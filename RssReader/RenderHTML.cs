@@ -122,7 +122,7 @@ namespace RssReader
       int col;
       foreach (HTML.Element r in e.Contents) {
         col = 0;
-        foreach (HTML.Element c in e.Contents) {
+        foreach (HTML.Element c in r.Contents) {
           int colspan = GetSpan(c, "colspan");
           int rowspan = GetSpan(c, "rowspan");
           while (!Usable(occupied, row, col, colspan)) {
