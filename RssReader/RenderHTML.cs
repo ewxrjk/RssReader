@@ -17,24 +17,29 @@ using System.Collections.ObjectModel;
 namespace RssReader
 {
   /// <summary>
-  /// HTML Renderer
+  /// Convert an HTML document to a FlowDocument
   /// </summary>
   public class RenderHTML
   {
     /// <summary>
     /// Monospace font
     /// </summary>
-    FontFamily MonospaceFont = new FontFamily("Global Monospace");
+    public FontFamily MonospaceFont = new FontFamily("Global Monospace");
 
     /// <summary>
     /// Text font
     /// </summary>
-    FontFamily TextFont = new FontFamily("Global Serif");
+    public FontFamily TextFont = new FontFamily("Global Serif");
 
     /// <summary>
     /// Heading font
     /// </summary>
-    FontFamily HeadingFont = new FontFamily("Global Sans Serif");
+    public FontFamily HeadingFont = new FontFamily("Global Sans Serif");
+
+    /// <summary>
+    /// Containing scrollviewer
+    /// </summary>
+    public ScrollViewer ParentScrollViewer = null;
 
     /// <summary>
     /// Render an HTML document
@@ -42,137 +47,87 @@ namespace RssReader
     /// <param name="document"></param>
     /// <param name="scrollviewer">Containing viewer (for width bound)</param>
     /// <returns></returns>
-    public FrameworkElement Render(HTML.Document document,
-                                   ScrollViewer scrollviewer)
+    public FrameworkElement Render(HTML.Document document)
     {
-      return RenderBlocks(document.HTML.Follow("body"), scrollviewer);
+      FlowDocument fd = new FlowDocument();
+      fd.SetBinding(FlowDocument.PageWidthProperty,
+                    new Binding()
+                    {
+                      Source = ParentScrollViewer,
+                      Path = new PropertyPath("ViewportWidth"),
+                    });
+      fd.Blocks.AddRange(ConvertBlocks(document.HTML.Follow("body")));
+      return new RichTextBox() { 
+        Document = fd,
+        IsDocumentEnabled = true,
+        IsReadOnly = true,
+        BorderThickness = new Thickness(0),
+      };
     }
 
-    private FrameworkElement RenderBlocks(HTML.Element root,
-                                          ScrollViewer scrollviewer)
+    private IEnumerable<Block> ConvertBlocks(HTML.Element root)
     {
-      StackPanel container = new StackPanel();
-      UIElementCollection children = container.Children;
-      for (int i = 0; i < root.Contents.Count; ++i) {
-        HTML.Element e = root.Contents[i] as HTML.Element;
-        //Console.WriteLine("<{0}>", e.Name);
-        switch (e.Name) {
-          case "ul":
-            children.Add(RenderList(e,
-                                    y => "•",
-                                    scrollviewer));
-            break;
-          case "ol":
-            children.Add(RenderList(e,
-                                    y => string.Format("{0}.", y + 1),
-                                    scrollviewer));
-            break;
-          case "h1":
-          case "h2":
-          case "h3":
-          case "h4":
-          case "h5":
-          case "h6":
-            children.Add(RenderParagraph(e, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, HeadingFont, scrollviewer));
-            break;
-          case "pre":
-            children.Add(RenderParagraph(e, 1, FontWeights.Normal, MonospaceFont, scrollviewer, false));
-            break;
-          case "table":
-            children.Add(RenderTable(e, scrollviewer));
-            break;
-          default:
-            children.Add(RenderParagraph(e, 1, FontWeights.Normal, TextFont, scrollviewer));
-            break;
-        }
-        //Console.WriteLine("</{0}>", e.Name);
+      return from block in
+               (from element in root.Contents select ConvertBlock(element as HTML.Element))
+             where block != null
+             select block;
+    }
+
+    private Block ConvertBlock(HTML.Element e)
+    {
+      switch (e.Name) {
+        case "ul":
+          return ConvertList(e);
+        case "ol":
+          List l = ConvertList(e);
+          l.StartIndex = 1;
+          return l;
+        case "h1":
+        case "h2":
+        case "h3":
+        case "h4":
+        case "h5":
+        case "h6":
+          return ConvertParagraph(e, HeadingFont, FontWeights.Bold, Math.Pow(1.125, '7' - e.Name[1]));
+        case "pre":
+          return ConvertParagraph(e, MonospaceFont, FontWeights.Normal, 1.0, false);
+        case "table":
+          return ConvertTable(e);
+        default:
+          return ConvertParagraph(e, TextFont, FontWeights.Normal, 1.0);
       }
-      return container;
     }
 
     #region Table Rendering
 
-    private struct TablePosition
+    private Table ConvertTable(HTML.Element e)
     {
-      public TablePosition(int row, int col)
-      {
-        this.row = row;
-        this.col = col;
-      }
-      public int row;
-      public int col;
-    }
-
-    private static bool Usable(ISet<TablePosition> occupied,
-                               int row, int col, int colspan)
-    {
-      while (colspan > 0) {
-        if (occupied.Contains(new TablePosition(row, col))) {
-          return false;
+      Table t = new Table();
+      TableRowGroup trg = new TableRowGroup();
+      t.RowGroups.Add(trg);
+      int columns = 0;
+      foreach(HTML.Element r in e.Contents) {
+        TableRow tr = new TableRow();
+        trg.Rows.Add(tr);
+        int columnNumber = 0;
+        foreach(HTML.Element c in r.Contents) {
+          TableCell tc = new TableCell()
+          {
+            ColumnSpan = GetSpan(c, "colspan"),
+            RowSpan = GetSpan(c, "rowspan"),
+          };
+          tc.Blocks.AddRange(ConvertBlocks(c));
+          tr.Cells.Add(tc);
+          columnNumber += tc.ColumnSpan;
         }
-        ++col;
-        --colspan;
-      }
-      return true;
-    }
-
-    UIElement RenderTable(HTML.Element e, ScrollViewer scrollviewer)
-    {
-      Grid g = new Grid()
-      {
-        HorizontalAlignment = HorizontalAlignment.Left,
-      };
-      if (scrollviewer != null) {
-        g.SetBinding(Grid.MaxWidthProperty,
-                     new Binding()
-                     {
-                       Source = scrollviewer,
-                       Path = new PropertyPath("ViewportWidth"),
-                     });
-      }
-      HashSet<TablePosition> occupied = new HashSet<TablePosition>();
-      int maxrow = 0;
-      int maxcol = 0;
-      int row = 0;
-      int col;
-      foreach (HTML.Element r in e.Contents) {
-        col = 0;
-        foreach (HTML.Element c in r.Contents) {
-          int colspan = GetSpan(c, "colspan");
-          int rowspan = GetSpan(c, "rowspan");
-          while (!Usable(occupied, row, col, colspan)) {
-            ++col;
-          }
-          if (c.Contents.Count != 0) {
-            FrameworkElement content = RenderBlocks(c, scrollviewer);
-            Grid.SetColumn(content, col);
-            Grid.SetColumnSpan(content, colspan);
-            Grid.SetRow(content, row);
-            Grid.SetRowSpan(content, rowspan);
-            g.Children.Add(content);
-          }
-          for (int cn = 0; cn < colspan; ++cn) {
-            for (int rn = 0; rn < rowspan; ++rn) {
-              occupied.Add(new TablePosition(row + rn, col + cn));
-            }
-          }
-          if (row + rowspan - 1 > maxrow) {
-            maxrow = row + rowspan - 1;
-          }
-          col += colspan;
+        if (columnNumber > columns) {
+          columns = columnNumber;
         }
-        if (col - 1 > maxcol) {
-          maxcol = col - 1;
-        }
-        ++row;
       }
-      for (row = 0; row <= maxrow; ++row) {
-        g.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+      for (int i = 0; i < columns; ++i) {
+        t.Columns.Add(new TableColumn());
       }
-      for (col = 0; col <= maxcol; ++col) {
-        g.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
-      }
-      return g;
+      return t;
     }
 
     static private int GetSpan(HTML.Element e, string attribute)
@@ -192,190 +147,143 @@ namespace RssReader
 
     #endregion
 
-    private UIElement RenderList(HTML.Element e, Func<int, string> makeBullet, ScrollViewer scrollviewer)
+    #region Lists
+
+    private List ConvertList(HTML.Element e)
     {
-      Grid g = new Grid()
-      {
-        HorizontalAlignment = HorizontalAlignment.Left,
-      };
-      if (scrollviewer != null) {
-        g.SetBinding(Grid.MaxWidthProperty,
-                     new Binding()
-                     {
-                       Source = scrollviewer,
-                       Path = new PropertyPath("ViewportWidth"),
-                     });
-      }
-      g.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
-      g.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
-      int y = 0;
+      List l = new List();
       foreach (HTML.Element ee in e.Contents) {
-        //Console.WriteLine("<{0}>", ee.Name);
-        g.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
-        TextBlock bullet = new TextBlock()
-        {
-          Text = makeBullet(y),
-          Padding = new Thickness(2),
-          HorizontalAlignment = HorizontalAlignment.Right,
-        };
-        Grid.SetColumn(bullet, 0);
-        Grid.SetRow(bullet, y);
-        g.Children.Add(bullet);
-        FrameworkElement content = RenderBlocks(ee, scrollviewer);
-        Grid.SetColumn(content, 1);
-        Grid.SetRow(content, y);
-        g.Children.Add(content);
-        ++y;
-        //Console.WriteLine("</{0}>", ee.Name);
+        ListItem li = new ListItem();
+        li.Blocks.AddRange(ConvertBlocks(ee));
+        l.ListItems.Add(li);
       }
-      return g;
+      return l;
     }
 
-    private UIElement RenderParagraph(HTML.Element e,
-                                      double fontScale,
-                                      FontWeight fontWeight,
-                                      FontFamily fontFamily,
-                                      ScrollViewer scrollviewer,
-                                      bool collapseSpace = true)
+    #endregion
+
+    #region Paragraphs
+
+    private char LastCharacter;
+
+    private Paragraph ConvertParagraph(HTML.Element e, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace = true)
     {
-      TextBlock t = new TextBlock()
-      {
-        TextWrapping = TextWrapping.Wrap,
-        Padding = new Thickness(2),
-        HorizontalAlignment = HorizontalAlignment.Left,
-      };
-      ParagraphSizeTracker pst = new ParagraphSizeTracker()
-      {
-        Container = scrollviewer
-      };
-      if (collapseSpace) {
-        t.SetBinding(TextBlock.MaxWidthProperty,
-                     new Binding()
-                     {
-                       Source = pst,
-                       Path = new PropertyPath("Width")
-                     });
-      }
       LastCharacter = ' ';
-      foreach (HTML.Node node in e.Contents) {
-        Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily, pst, collapseSpace);
-        if (i != null) {
-          t.Inlines.Add(i);
-        }
-      }
-      return t;
+      Paragraph p = new Paragraph();
+      p.Inlines.AddRange(ConvertInlines(e, fontFamily, fontWeight, fontScale, collapseSpace,
+                                        new ParagraphSizeTracker() { Container = ParentScrollViewer }));
+      return p.Inlines.Count > 0 ? p : null;
     }
 
-    private char LastCharacter = ' ';
-
-    private Inline RenderInlines(HTML.Node n, double fontScale, FontWeight fontWeight, FontFamily fontFamily, ParagraphSizeTracker pst, bool collapseSpace)
+    private IEnumerable<Inline> ConvertInlines(HTML.Element e, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace, ParagraphSizeTracker pst)
     {
-      HTML.Element e = n as HTML.Element;
-      if (e != null) {
-        Inline newInline;
-        //Console.WriteLine("<{0}>", e.Name);
-        switch (e.Name) {
-          case "b":
-          case "strong": newInline = new Span(); fontWeight = FontWeights.Bold; break;
-          case "i":
-          case "em": newInline = new Italic(); break;
-          case "u": newInline = new Underline(); break;
-          case "big": newInline = new Span(); fontScale *= 1.125; break;
-          case "small": newInline = new Span(); fontScale /= 1.125; break;
-          case "code":
-          case "tt": newInline = new Span(); fontFamily = MonospaceFont; break;
-          case "sub": newInline = new Span(); newInline.Typography.Variants = FontVariants.Subscript; break;
-          case "sup": newInline = new Span(); newInline.Typography.Variants = FontVariants.Superscript; break;
-          case "a":
-            newInline = RenderHyperlink(e);
-            break;
-          case "img":
-            newInline = RenderImage(e, pst);
-            break;
-          // TODO map, anything else?
-          default: newInline = new Span(); break;
-        }
-        if (newInline is Span) {
-          foreach (HTML.Node node in e.Contents) {
-            Inline i = RenderInlines(node, fontScale, fontWeight, fontFamily, pst, collapseSpace);
-            if (i != null) {
-              (newInline as Span).Inlines.Add(i);
-            }
-          }
-        }
-        //Console.WriteLine("</{0}>", e.Name);
-        return newInline;
+      return from i in
+               (from n in e.Contents select ConvertInline(n, fontFamily, fontWeight, fontScale, collapseSpace, pst)) 
+             where i != null
+             select i;
+    }
+
+    #endregion
+
+    #region Inlines
+
+    private Inline ConvertInline(HTML.Node n, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace, ParagraphSizeTracker pst)
+    {
+      if (n is HTML.Element) {
+        return ConvertInlineElement((HTML.Element)n, fontFamily, fontWeight, fontScale, collapseSpace, pst);
       }
       else {
-        //Console.WriteLine("text: [{0}]", ((HTML.Cdata)n).Content);
-        Inline i;
-        if (collapseSpace) {
-          StringBuilder sb = new StringBuilder();
-          foreach (char c in ((HTML.Cdata)n).Content) {
-            char ch;
-            switch (c) {
-              case ' ':
-              case '\t':
-              case '\n':
-              case '\r':
-                if (LastCharacter == ' ') {
-                  continue;
-                }
-                ch = ' ';
-                break;
-              default:
-                ch = c;
-                break;
-            }
-            sb.Append(ch);
-            LastCharacter = ch;
-          }
-          string s = sb.ToString();
-          if (s.Length > 0) {
-            i = new Run(s);
-          }
-          else {
-            return null;
-          }
-        }
-        else {
-          string s = ((HTML.Cdata)n).Content;
-          Span span = new Span();
-          i = span;
-          StringBuilder sb = null;
-          foreach (char c in ((HTML.Cdata)n).Content) {
-            switch (c) {
-              case '\n':
-                if (sb != null) {
-                  if (sb.Length > 0) {
-                    span.Inlines.Add(new Run(sb.ToString()));
-                  }
-                  sb = null;
-                }
-                span.Inlines.Add(new LineBreak());
-                break;
-              default:
-                if (sb == null) {
-                  sb = new StringBuilder();
-                }
-                sb.Append(c);
-                break;
-            }
-          }
-          if (sb != null && sb.Length > 0) {
-            span.Inlines.Add(new Run(sb.ToString()));
-          }
-        }
-        i.FontSize *= fontScale;
-        if (fontFamily != null) {
+        Inline i = collapseSpace ? ConvertText(((HTML.Cdata)n).Content)
+                                 : ConvertFixedText(((HTML.Cdata)n).Content);
+        if (i != null) {
+          i.FontSize *= fontScale;
           i.FontFamily = fontFamily;
+          i.FontWeight = fontWeight;
         }
-        i.FontWeight = fontWeight;
         return i;
       }
     }
 
-    private Inline RenderHyperlink(HTML.Element e)
+    private Inline ConvertInlineElement(HTML.Element e, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace, ParagraphSizeTracker pst)
+    {
+      Span s;
+      switch (e.Name) {
+        case "b":
+        case "strong": s = new Span(); fontWeight = FontWeights.Bold; break;
+        case "i":
+        case "em": s = new Italic(); break;
+        case "u": s = new Underline(); break;
+        case "big": s = new Span(); fontScale *= 1.125; break;
+        case "small": s = new Span(); fontScale /= 1.125; break;
+        case "code":
+        case "tt": s = new Span(); fontFamily = MonospaceFont; break;
+        case "sub": s = new Span(); s.Typography.Variants = FontVariants.Subscript; break;
+        case "sup": s = new Span(); s.Typography.Variants = FontVariants.Superscript; break;
+        case "a":
+          s = RenderHyperlink(e);
+          break;
+        case "img":
+          return RenderImage(e, pst);
+        // TODO map, anything else?
+        default: s = new Span(); break;
+      }
+      s.Inlines.AddRange(ConvertInlines(e, fontFamily, fontWeight, fontScale, collapseSpace, pst));
+      return s;
+    }
+
+    private Inline ConvertText(string text)
+    {
+      StringBuilder sb = new StringBuilder();
+      foreach (char c in text) {
+        char ch;
+        switch (c) {
+          case ' ':
+          case '\t':
+          case '\n':
+          case '\r':
+            if (LastCharacter == ' ') {
+              continue;
+            }
+            ch = ' ';
+            break;
+          default:
+            ch = c;
+            break;
+        }
+        sb.Append(ch);
+        LastCharacter = ch;
+      }
+      string s = sb.ToString();
+      return s.Length > 0 ? new Run(s) : null;
+    }
+
+    private Inline ConvertFixedText(string text)
+    {
+      Span span = new Span();
+      StringBuilder sb = null;
+      foreach (char c in text) {
+        switch (c) {
+          case '\n':
+            if (sb != null) {
+              if (sb.Length > 0) {
+                span.Inlines.Add(new Run(sb.ToString()));
+              }
+              sb = null;
+            }
+            span.Inlines.Add(new LineBreak());
+            break;
+          default:
+            if (sb == null) {
+              sb = new StringBuilder();
+            }
+            sb.Append(c);
+            break;
+        }
+      }
+      return span;
+    }
+
+    private Hyperlink RenderHyperlink(HTML.Element e)
     {
       Hyperlink h = new Hyperlink();
       if (e.Attributes.ContainsKey("href")) {
@@ -395,7 +303,7 @@ namespace RssReader
       e.Handled = true;
     }
 
-    private Inline RenderImage(HTML.Element e, ParagraphSizeTracker pst)
+    private InlineUIContainer RenderImage(HTML.Element e, ParagraphSizeTracker pst)
     {
       Uri ImageURI;
       if (e.Attributes.ContainsKey("src")
@@ -443,6 +351,8 @@ namespace RssReader
     }
 
     static private Dictionary<Uri, Tuple<int, int>> ImageSizeCache = new Dictionary<Uri, Tuple<int, int>>();
+
+    #endregion
 
     private class ParagraphSizeTracker : INotifyPropertyChanged
     {

@@ -51,11 +51,15 @@ namespace RssReader
 
     private void SetBody()
     {
-      RenderHTML renderer = new RenderHTML();
-      FrameworkElement newContent = renderer.Render(Model.HtmlDescription, FindScrollViewer(Expander));
+      RenderHTML renderer = new RenderHTML()
+      {
+        ParentScrollViewer = FindScrollViewer(Expander)
+      };
+      FrameworkElement newContent = renderer.Render(Model.HtmlDescription);
       if (HasBody()) {
         Panel.Children[1] = newContent;
-      } else {
+      }
+      else {
         Panel.Children.Add(newContent);
       }
     }
