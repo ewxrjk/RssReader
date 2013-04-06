@@ -8,18 +8,23 @@
         SizeToContent="WidthAndHeight"
         Width="auto"
         Height="auto">
+  <Window.Resources>
+    <BitmapImage x:Key="Icon" UriSource="HalfMoon256x256.png"/>
+  </Window.Resources>
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="auto"></RowDefinition>
       <RowDefinition Height="auto"></RowDefinition>
       <RowDefinition Height="auto"></RowDefinition>
       <RowDefinition Height="auto"></RowDefinition>
+      <RowDefinition Height="auto"></RowDefinition>
     </Grid.RowDefinitions>
     <TextBlock Grid.Column="0" Grid.Row="0" FontSize="32" Margin="4" TextAlignment="Center">HalfMoon RSS Reader</TextBlock>
-    <TextBlock Grid.Column="0" Grid.Row="1" FontSize="12" Margin="4" TextAlignment="Center">
+    <Image Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" Stretch="None" Source="{StaticResource Icon}"></Image>
+    <TextBlock Grid.Column="0" Grid.Row="2" FontSize="12" Margin="4" TextAlignment="Center">
       <Hyperlink Name="link" NavigateUri="http://www.greenend.org.uk/rjk/" RequestNavigate="VisitHomePage">http://www.greenend.org.uk/rjk/</Hyperlink> <!-- TODO -->
     </TextBlock>
-    <TextBlock Grid.Column="0" Grid.Row="2" FontSize="12" Margin="4" TextAlignment="Center">© 2013 Richard Kettlewell</TextBlock>
-    <Button Grid.Column="0" Grid.Row="3" Click="OK"  Margin="4"  Width="64" Height="auto" IsDefault="True">OK</Button>
+    <TextBlock Grid.Column="0" Grid.Row="3" FontSize="12" Margin="4" TextAlignment="Center">© 2013 Richard Kettlewell</TextBlock>
+    <Button Grid.Column="0" Grid.Row="4" Click="OK"  Margin="4"  Width="64" Height="auto" IsDefault="True">OK</Button>
   </Grid>
 </Window>
