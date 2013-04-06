@@ -59,6 +59,9 @@ namespace ReaderLib
 
     #region Public Fields And Properties
 
+    /// <summary>
+    /// Subscription title
+    /// </summary>
     [UserVisible(Modifiable = false, Priority = 0)]
     public string Title
     {
@@ -90,6 +93,9 @@ namespace ReaderLib
       }
     }
 
+    /// <summary>
+    /// Last error for this subscription
+    /// </summary>
     [XmlIgnore]
     public Exception Error
     {

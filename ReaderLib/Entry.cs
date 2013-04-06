@@ -7,9 +7,6 @@ namespace ReaderLib
   /// <summary>
   /// Data for a single subscription entry
   /// </summary>
-  /// <remarks>
-  /// <para>Subclassed by each subscription type.</para>
-  /// </remarks>
   [XmlInclude(typeof(WebEntry))]
   public class Entry : UniquelyIdentifiable, INotifyPropertyChanged
   {
@@ -105,7 +102,7 @@ namespace ReaderLib
     /// <param name="propertyName"></param>
     /// <remarks>For example, if one entry's read state changes then the
     /// subscription's unread count must change to match.</remarks>
-    protected void ParentPropertyChanged(string propertyName)
+    private void ParentPropertyChanged(string propertyName)
     {
       if (ParentSubscription != null) {
         ParentSubscription.OnPropertyChanged(propertyName);

@@ -9,6 +9,10 @@ namespace ReaderLib.HTML
   /// </summary>
   public abstract class Node
   {
+    /// <summary>
+    /// Write string format
+    /// </summary>
+    /// <param name="writer"></param>
     public abstract void Write(TextWriter writer);
 
     public override string ToString()
@@ -60,6 +64,9 @@ namespace ReaderLib.HTML
     /// <param name="Names"></param>
     /// <param name="pos"></param>
     /// <returns></returns>
+    /// <remarks><code>this</code> is indicate by an empty path.
+    /// The path to the first child with a given name of an element
+    /// is the path to the element extended by the child name.</remarks>
     public Element Follow(IList<string> path, int pos = 0)
     {
       if (pos >= path.Count()) {
@@ -69,6 +76,11 @@ namespace ReaderLib.HTML
       return child != null ? child.Follow(path, pos + 1) : null;
     }
 
+    /// <summary>
+    /// Follow a path to a descendant element
+    /// </summary>
+    /// <param name="path">Node names in path separated by dots</param>
+    /// <returns></returns>
     public Element Follow(string path)
     {
       return Follow(path.Split(new char[] { '.' }));
@@ -125,6 +137,9 @@ namespace ReaderLib.HTML
   /// </summary>
   public class Cdata : Node
   {
+    /// <summary>
+    /// Character data
+    /// </summary>
     public string Content;
 
     public override void Write(TextWriter writer)
@@ -154,6 +169,9 @@ namespace ReaderLib.HTML
       HTML = null;
     }
 
+    /// <summary>
+    /// HTML element for this document
+    /// </summary>
     public Element HTML { get; set; }
 
     public void Write(TextWriter writer)
@@ -166,11 +184,21 @@ namespace ReaderLib.HTML
       return HTML.ToString();
     }
 
+    /// <summary>
+    /// Read an HTML document
+    /// </summary>
+    /// <param name="tr"></param>
+    /// <returns></returns>
     static public Document Parse(TextReader tr)
     {
       return (new Parser() { Input = tr }).Parse();
     }
 
+    /// <summary>
+    /// Convert a string to an HTML document
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns></returns>
     static public Document Parse(string s)
     {
       return Parse(new StringReader(s));

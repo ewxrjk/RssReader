@@ -33,6 +33,10 @@ namespace ReaderLib.HTML
   /// <description>B, I, etc; appear in inline context</description>
   /// </item>
   /// <item>
+  /// <item>
+  /// <term>Table elements</term>
+  /// <description>Appears in block context, cells provide block context</description>
+  /// </item>
   /// <term>Character data</term>
   /// <description>Appears in inline context</description></item>
   /// </list>
@@ -42,10 +46,20 @@ namespace ReaderLib.HTML
   /// TODO something better.  webkitdotnot?
   public partial class Parser
   {
+    /// <summary>
+    /// HTML is read from here
+    /// </summary>
     public TextReader Input { get; set; }
 
+    /// <summary>
+    /// The parsed HTML document
+    /// </summary>
     public Document Document { get; set; }
 
+    /// <summary>
+    /// Parse from the current input
+    /// </summary>
+    /// <returns>The parsed HTML document</returns>
     public Document Parse()
     {
       Document = new Document();

@@ -11,6 +11,8 @@ namespace ReaderLib
   /// <summary>
   /// Data for all the entries in a subscription
   /// </summary>
+  /// <remarks>A separate class from <code>Subscription</code> so that each subscription
+  /// is serialized to a separate file.</remarks>
   public class EntryList: INotifyPropertyChanged
   {
     public EntryList()
@@ -82,7 +84,7 @@ namespace ReaderLib
     /// <summary>
     /// XML serializer for this type
     /// </summary>
-    static public XmlSerializer Serializer = new XmlSerializer(typeof(EntryList));
+    static private XmlSerializer Serializer = new XmlSerializer(typeof(EntryList));
 
     #endregion
 
@@ -117,7 +119,7 @@ namespace ReaderLib
     #region Loading
 
     /// <summary>
-    /// Load component contents
+    /// Load an entrylist from a file
     /// </summary>
     /// <returns></returns>
     public static EntryList Load(Subscription sub, string path = null)
@@ -171,6 +173,7 @@ namespace ReaderLib
     }
 
     #endregion
+
     #region INotifyPropertyChanged
 
     public event PropertyChangedEventHandler PropertyChanged;

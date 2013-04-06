@@ -7,7 +7,7 @@ namespace ReaderLib.HTML
     /// <summary>
     /// Known HTML character entities by name
     /// </summary>
-    private static Dictionary<string, int> Entities = new Dictionary<string, int>() {
+    internal static Dictionary<string, int> Entities = new Dictionary<string, int>() {
       { "nbsp",    160 },
       { "iexcl",   161 },
       { "cent",    162 },
