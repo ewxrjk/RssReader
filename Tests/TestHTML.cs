@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ReaderLib;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using HTML = ReaderLib.HTML;
 
 namespace Tests

@@ -1,13 +1,9 @@
-﻿using System;
-using ReaderLib;
+﻿using ReaderLib;
+using System;
 using System.ComponentModel;
-using System.Windows;
-using System.Windows.Controls;
-using HTML = ReaderLib.HTML;
-using System.Windows.Documents;
-using System.Windows.Data;
-using System.Windows.Media;
 using System.Runtime.CompilerServices;
+using System.Windows;
+using HTML = ReaderLib.HTML;
 
 namespace RssReader
 {
