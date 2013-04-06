@@ -169,7 +169,7 @@ namespace RssReader
       LastCharacter = ' ';
       Paragraph p = new Paragraph();
       p.Inlines.AddRange(ConvertInlines(e, fontFamily, fontWeight, fontScale, collapseSpace,
-                                        new ParagraphSizeTracker() { Container = ParentScrollViewer }));
+                                        new ParagraphSizeTracker() { ParentScrollViewer = ParentScrollViewer }));
       return p.Inlines.Count > 0 ? p : null;
     }
 
@@ -364,8 +364,8 @@ namespace RssReader
               m = image.Width;
             }
           }
-          if (Container != null) {
-            double cw = Container.ViewportWidth - 4;
+          if (ParentScrollViewer != null) {
+            double cw = ParentScrollViewer.ViewportWidth - 4;
             if (cw > m) {
               m = cw;
             }
@@ -387,27 +387,27 @@ namespace RssReader
         OnPropertyChanged("Width");
       }
 
-      public ScrollViewer Container
+      public ScrollViewer ParentScrollViewer
       {
         get
         {
-          return _Container;
+          return _ParentScrollViewer;
         }
         set
         {
-          if (_Container != null) {
-            _Container.ScrollChanged -= ContainerScrollChanged;
+          if (_ParentScrollViewer != null) {
+            _ParentScrollViewer.ScrollChanged -= ParentScrollViewerChanged;
           }
           if (value != null) {
-            value.ScrollChanged += ContainerScrollChanged;
+            value.ScrollChanged += ParentScrollViewerChanged;
           }
-          _Container = value;
+          _ParentScrollViewer = value;
         }
       }
 
-      private ScrollViewer _Container = null;
+      private ScrollViewer _ParentScrollViewer = null;
 
-      private void ContainerScrollChanged(object sender, ScrollChangedEventArgs e)
+      private void ParentScrollViewerChanged(object sender, ScrollChangedEventArgs e)
       {
         if (e.ViewportWidthChange != 0) {
           OnPropertyChanged("Width");
