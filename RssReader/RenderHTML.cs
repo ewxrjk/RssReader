@@ -16,28 +16,41 @@ using System.Collections.ObjectModel;
 
 namespace RssReader
 {
+  /// <summary>
+  /// HTML Renderer
+  /// </summary>
   public class RenderHTML
   {
-    static readonly FontFamily Monospace = new FontFamily("Global Monospace");
+    /// <summary>
+    /// Monospace font
+    /// </summary>
+    FontFamily MonospaceFont = new FontFamily("Global Monospace");
 
-    static public FrameworkElement Render(HTML.Document document,
-                                          ScrollViewer scrollviewer)
+    /// <summary>
+    /// Text font
+    /// </summary>
+    FontFamily TextFont = new FontFamily("Global Serif");
+
+    /// <summary>
+    /// Heading font
+    /// </summary>
+    FontFamily HeadingFont = new FontFamily("Global Sans Serif");
+
+    /// <summary>
+    /// Render an HTML document
+    /// </summary>
+    /// <param name="document"></param>
+    /// <param name="scrollviewer">Containing viewer (for width bound)</param>
+    /// <returns></returns>
+    public FrameworkElement Render(HTML.Document document,
+                                   ScrollViewer scrollviewer)
     {
-      RenderHTML renderer = new RenderHTML();
-      return renderer.RenderBlocks(document.HTML.Follow("body"), scrollviewer);
+      return RenderBlocks(document.HTML.Follow("body"), scrollviewer);
     }
 
     private FrameworkElement RenderBlocks(HTML.Element root,
                                           ScrollViewer scrollviewer)
     {
-      /*
-       * TextBlock container = new TextBlock()
-              {
-                TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(1),
-              };
-            }
-       */
       StackPanel container = new StackPanel();
       UIElementCollection children = container.Children;
       for (int i = 0; i < root.Contents.Count; ++i) {
@@ -60,22 +73,24 @@ namespace RssReader
           case "h4":
           case "h5":
           case "h6":
-            children.Add(RenderParagraph(e, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, null, scrollviewer));
+            children.Add(RenderParagraph(e, Math.Pow(1.125, '7' - e.Name[1]), FontWeights.Bold, HeadingFont, scrollviewer));
             break;
           case "pre":
-            children.Add(RenderParagraph(e, 1, FontWeights.Normal, Monospace, scrollviewer, false));
+            children.Add(RenderParagraph(e, 1, FontWeights.Normal, MonospaceFont, scrollviewer, false));
             break;
           case "table":
             children.Add(RenderTable(e, scrollviewer));
             break;
           default:
-            children.Add(RenderParagraph(e, 1, FontWeights.Normal, null, scrollviewer));
+            children.Add(RenderParagraph(e, 1, FontWeights.Normal, TextFont, scrollviewer));
             break;
         }
         //Console.WriteLine("</{0}>", e.Name);
       }
       return container;
     }
+
+    #region Table Rendering
 
     private struct TablePosition
     {
@@ -175,6 +190,8 @@ namespace RssReader
       return 1;
     }
 
+    #endregion
+
     private UIElement RenderList(HTML.Element e, Func<int, string> makeBullet, ScrollViewer scrollviewer)
     {
       Grid g = new Grid()
@@ -266,7 +283,7 @@ namespace RssReader
           case "big": newInline = new Span(); fontScale *= 1.125; break;
           case "small": newInline = new Span(); fontScale /= 1.125; break;
           case "code":
-          case "tt": newInline = new Span(); fontFamily = Monospace; break;
+          case "tt": newInline = new Span(); fontFamily = MonospaceFont; break;
           case "sub": newInline = new Span(); newInline.Typography.Variants = FontVariants.Subscript; break;
           case "sup": newInline = new Span(); newInline.Typography.Variants = FontVariants.Superscript; break;
           case "a":
