@@ -220,8 +220,8 @@ namespace ReaderLib
         {
           Identity = id,
           Serial = this.NextSerial++,
-          Parent = this,
-          Container = _Entries,
+          ParentSubscription = this,
+          ParentEntryList = _Entries,
         };
         newEntry = true;
       }

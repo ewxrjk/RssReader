@@ -28,7 +28,7 @@ namespace ReaderLib
     /// Parent subscription object
     /// </summary>
     [XmlIgnore]
-    public Subscription Parent;
+    public Subscription ParentSubscription;
 
     /// <summary>
     /// Dirty flag, set when anything changes
@@ -76,7 +76,7 @@ namespace ReaderLib
     /// <returns></returns>
     private string Filename()
     {
-      return Filename(Parent);
+      return Filename(ParentSubscription);
     }
 
     /// <summary>
@@ -93,8 +93,8 @@ namespace ReaderLib
     /// </summary>
     public void Save(bool force = false)
     {
-      if (Parent.Parent != null && (Dirty || force)) {
-        Directory.CreateDirectory(Parent.Directory());
+      if (ParentSubscription.Parent != null && (Dirty || force)) {
+        Directory.CreateDirectory(ParentSubscription.Directory());
         Save(Filename());
         Dirty = false;
       }
@@ -134,10 +134,10 @@ namespace ReaderLib
       else {
         newComponent = new EntryList();
       }
-      newComponent.Parent = sub;
+      newComponent.ParentSubscription = sub;
       foreach (Entry entry in newComponent.Entries.Values) {
-        entry.Parent = sub;
-        entry.Container = newComponent;
+        entry.ParentSubscription = sub;
+        entry.ParentEntryList = newComponent;
       }
       return newComponent;
     }

@@ -17,14 +17,14 @@ namespace ReaderLib
     /// Containing subscription
     /// </summary>
     [XmlIgnore]
-    public Subscription Parent;
+    public Subscription ParentSubscription;
 
     /// <summary>
     /// Containing list
     /// </summary>
     /// <remarks>We only need this to set the <c>Dirty</c> flag.</remarks>
     [XmlIgnore]
-    public EntryList Container;
+    public EntryList ParentEntryList;
 
     /// <summary>
     /// Entry title
@@ -107,8 +107,8 @@ namespace ReaderLib
     /// subscription's unread count must change to match.</remarks>
     protected void ParentPropertyChanged(string propertyName)
     {
-      if (Parent != null) {
-        Parent.OnPropertyChanged(propertyName);
+      if (ParentSubscription != null) {
+        ParentSubscription.OnPropertyChanged(propertyName);
       }
     }
 
@@ -118,8 +118,8 @@ namespace ReaderLib
 
     public void OnPropertyChanged([CallerMemberName]string propertyName = "")
     {
-      if (Container != null) {
-        Container.Dirty = true;
+      if (ParentEntryList != null) {
+        ParentEntryList.Dirty = true;
       }
       PropertyChangedEventHandler handler = PropertyChanged;
       if (handler != null) {
