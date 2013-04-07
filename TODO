@@ -1,0 +1,23 @@
+Menu bar:
+   Subscription operations
+     Subscribe
+     Read online
+     Mark all read
+     Edit
+     Unsubscribe
+     Refresh (...all)
+     Entry operations
+     Read online
+     Mark read/unread (checkbox)
+     Copy URI
+   Edit
+     Search
+
+Subscription/entry ordering/visibility
+  Unread first
+  Unread only
+
+Use async instead of a background thread?
+More keyboard shortcuts?
+Missing HTML support?
+Honor type attributes in atom properly
