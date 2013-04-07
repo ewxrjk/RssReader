@@ -247,32 +247,61 @@ namespace RssReader
 
     #region Subscription list
 
+    private SubscriptionViewModel OldSubscriptionViewModel = null;
+
     private void SelectSubscription(object sender, SelectionChangedEventArgs e)
     {
       OnPropertyChanged("SubscriptionSelected");
+      OnPropertyChanged("SubscriptionCanReadOnline");
+      OnPropertyChanged("SubscriptionHasUnreadEntries");
+      if (OldSubscriptionViewModel != null) {
+        SelectedSubscriptionViewModel.PropertyChanged -= SubscriptionViewModelPropertyChanged;
+
+      }
+      if (SelectedSubscriptionViewModel != null) {
+        SelectedSubscriptionViewModel.PropertyChanged += SubscriptionViewModelPropertyChanged;
+      }
       object selected = SubscriptionsWidget.SelectedItem;
       EntriesWidget.ItemsSource = selected != null ? ((SubscriptionViewModel)selected).Entries : null;
+    }
+
+    private void SubscriptionViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+      OnPropertyChanged("Subscription" + e.PropertyName);
     }
 
     #endregion
 
     #region Subscription Context Menu
 
+    private SubscriptionViewModel SelectedSubscriptionViewModel
+    {
+      get
+      {
+        if (SubscriptionsWidget.SelectedIndex != -1) {
+          return (SubscriptionViewModel)SubscriptionsWidget.SelectedItem;
+        }
+        else {
+          return null;
+        }
+      }
+    }
+
     private void ReadSubscriptionOnline(object sender, RoutedEventArgs e)
     {
-      ((SubscriptionViewModel)SubscriptionsWidget.SelectedItem).ReadOnline();
+      SelectedSubscriptionViewModel.ReadOnline();
     }
 
     private void MarkSubscriptionRead(object sender, RoutedEventArgs e)
     {
-      ((SubscriptionViewModel)SubscriptionsWidget.SelectedItem).MarkAllEntriesRead();
+      SelectedSubscriptionViewModel.MarkAllEntriesRead();
     }
 
     private void EditSubscription(object sender, RoutedEventArgs e)
     {
       SubscriptionEditor editor = new SubscriptionEditor()
       {
-        Subscription = ((SubscriptionViewModel)SubscriptionsWidget.SelectedItem).Subscription,
+        Subscription = SelectedSubscriptionViewModel.Subscription,
         Owner = this
       };
       editor.ShowDialog();
@@ -280,7 +309,7 @@ namespace RssReader
 
     private void UnsubscribeSubscription(object sender, RoutedEventArgs e)
     {
-      Subscription subscription = ((SubscriptionViewModel)SubscriptionsWidget.SelectedItem).Subscription;
+      Subscription subscription = SelectedSubscriptionViewModel.Subscription;
       Perform(new Performable()
       {
         Description = string.Format("unsubscribe from {0}", subscription.Title),
@@ -294,6 +323,24 @@ namespace RssReader
       get
       {
         return SubscriptionsWidget.SelectedIndex != -1;
+      }
+    }
+
+    public bool SubscriptionCanReadOnline
+    {
+      get
+      {
+        SubscriptionViewModel svm = SelectedSubscriptionViewModel;
+        return svm != null ? svm.CanReadOnline : false;
+      }
+    }
+
+    public bool SubscriptionHasUnreadEntries
+    {
+      get
+      {
+        SubscriptionViewModel svm = SelectedSubscriptionViewModel;
+        return svm != null ? svm.HasUnreadEntries : false;
       }
     }
 

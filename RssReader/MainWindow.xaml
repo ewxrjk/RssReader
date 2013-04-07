@@ -47,6 +47,12 @@
         <MenuItem Header="_Subscribe" Command="{x:Static local:MainWindow.SubscribeCommand}"/>
         <MenuItem Header="_Unsubscribe" IsEnabled="{Binding SubscriptionSelected}" Click="UnsubscribeSubscription"/>
       </MenuItem>
+      <MenuItem Header="_Subscription">
+        <MenuItem Header="_Read online" Click="ReadSubscriptionOnline" IsEnabled="{Binding SubscriptionCanReadOnline}" ToolTip="{Binding PublicURI}"/>
+        <MenuItem Header="_Mark all read" Click="MarkSubscriptionRead" IsEnabled="{Binding SubscriptionHasUnreadEntries}"/>
+        <MenuItem Header="_Edit" Click="EditSubscription" IsEnabled="{Binding SubscriptionSelected}"/>
+        <MenuItem Header="_Unsubscribe" Click="UnsubscribeSubscription" IsEnabled="{Binding SubscriptionSelected}"/>
+      </MenuItem>
       <MenuItem Header="_Help">
         <MenuItem Header="_About" Command="{x:Static local:MainWindow.AboutCommand}"/>
       </MenuItem>
