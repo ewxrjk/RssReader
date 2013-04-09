@@ -23,8 +23,6 @@ namespace RssReader
       e.Handled = true;
     }
 
-    public ScrollViewer ContainingScrollViewer { get; set; }
-
     private EntryViewModel Model { get { return (EntryViewModel)DataContext; } }
 
     #region Entry Expansion
