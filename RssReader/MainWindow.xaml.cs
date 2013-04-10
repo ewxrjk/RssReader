@@ -263,6 +263,7 @@ namespace RssReader
       }
       object selected = SubscriptionsWidget.SelectedItem;
       EntriesWidget.ItemsSource = selected != null ? ((SubscriptionViewModel)selected).Entries : null;
+      EntriesScrollViewer.ScrollToHome();
     }
 
     private void SubscriptionViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
