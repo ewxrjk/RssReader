@@ -58,8 +58,7 @@ namespace RssReader
       }
       _Subscriptions = sl;
       _Subscriptions.BackgroundRegister(Dispatch, Error);
-      Subscriptions = new SubscriptionListViewModel(_Subscriptions);
-      // http://msdn.microsoft.com/en-us/library/ms745786.aspx for how to make listview sortable!
+      Subscriptions = new SubscriptionListViewModel(_Subscriptions, SubscriptionsWidget);
       this.DataContext = this;
     }
 
