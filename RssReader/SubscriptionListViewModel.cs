@@ -16,6 +16,7 @@ namespace RssReader
     {
       _Subscriptions = sl;
       SubscriptionsWidget = subscriptionsWidget;
+      subscriptionsWidget.Loaded += (sender, e) => { UpdateSortOrder(); };
       Subscriptions = new ObservableCollection<SubscriptionViewModel>();
       foreach (Subscription sub in _Subscriptions.Subscriptions) {
         Subscriptions.Add(new SubscriptionViewModel(sub));
