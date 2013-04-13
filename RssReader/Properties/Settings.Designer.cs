@@ -46,5 +46,29 @@ namespace RssReader.Properties {
                 this["SortEntriesByUnread"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SortSubscriptionsByName {
+            get {
+                return ((bool)(this["SortSubscriptionsByName"]));
+            }
+            set {
+                this["SortSubscriptionsByName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool SortSubscriptionsByUnread {
+            get {
+                return ((bool)(this["SortSubscriptionsByUnread"]));
+            }
+            set {
+                this["SortSubscriptionsByUnread"] = value;
+            }
+        }
     }
 }

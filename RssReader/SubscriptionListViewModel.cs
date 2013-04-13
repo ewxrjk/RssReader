@@ -28,7 +28,6 @@ namespace RssReader
       }
       _Subscriptions.SubscriptionAdded += SubscriptionAdded;
       _Subscriptions.SubscriptionRemoved += SubscriptionRemoved;
-      SortOrder = SortBy.Unread;
       ShowAll = true;
     }
 
@@ -51,44 +50,14 @@ namespace RssReader
 
     #region Sorting
 
-    public enum SortBy
-    {
-      Name,
-      Unread,
-    };
-
-    public SortBy SortOrder
-    {
-      get
-      {
-        return _SortOrder;
-      }
-      set
-      {
-        if (value != _SortOrder) {
-          _SortOrder = value;
-          OnPropertyChanged();
-          OnPropertyChanged("SortByName");
-          OnPropertyChanged("SortByUnread");
-          UpdateSortOrder();
-        }
-      }
-    }
-
-    private SortBy _SortOrder = SortBy.Name;
-
     private void UpdateSortOrder()
     {
       if (SubscriptionsWidget != null
          && SubscriptionsWidget.ItemsSource != null) {
         ICollectionView dataView = CollectionViewSource.GetDefaultView(SubscriptionsWidget.ItemsSource);
         dataView.SortDescriptions.Clear();
-        switch (_SortOrder) {
-          case SortBy.Name:
-            break;
-          case SortBy.Unread:
-            dataView.SortDescriptions.Add(new SortDescription("UnreadEntries", ListSortDirection.Descending));
-            break;
+        if (Properties.Settings.Default.SortSubscriptionsByUnread) {
+          dataView.SortDescriptions.Add(new SortDescription("UnreadEntries", ListSortDirection.Descending));
         }
         dataView.SortDescriptions.Add(new SortDescription("Title", ListSortDirection.Ascending));
       }
@@ -98,11 +67,20 @@ namespace RssReader
     {
       get
       {
-        return SortOrder == SortBy.Name;
+        return Properties.Settings.Default.SortSubscriptionsByName;
       }
       set
       {
-        SortOrder = SortBy.Name;
+        if (value != Properties.Settings.Default.SortSubscriptionsByName) {
+          Properties.Settings.Default.SortSubscriptionsByName = value;
+          if (value == true) {
+            Properties.Settings.Default.SortSubscriptionsByUnread = false;
+            OnPropertyChanged("SortByUnread");
+          }
+          OnPropertyChanged();
+          UpdateSortOrder();
+          Properties.Settings.Default.Save();
+        }
       }
     }
 
@@ -110,11 +88,20 @@ namespace RssReader
     {
       get
       {
-        return SortOrder == SortBy.Unread;
+        return Properties.Settings.Default.SortSubscriptionsByUnread;
       }
       set
       {
-        SortOrder = SortBy.Unread;
+        if (value != Properties.Settings.Default.SortSubscriptionsByUnread) {
+          Properties.Settings.Default.SortSubscriptionsByUnread = value;
+          if (value == true) {
+            Properties.Settings.Default.SortSubscriptionsByName = false;
+            OnPropertyChanged("SortByName");
+          }
+          OnPropertyChanged();
+          UpdateSortOrder();
+          Properties.Settings.Default.Save();
+        }
       }
     }
 
