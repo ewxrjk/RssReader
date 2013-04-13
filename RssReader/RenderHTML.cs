@@ -222,6 +222,8 @@ namespace RssReader
           break;
         case "img":
           return RenderImage(e, pst);
+        case "br":
+          return new LineBreak();
         // TODO map, anything else?
         default: s = new Span(); break;
       }
