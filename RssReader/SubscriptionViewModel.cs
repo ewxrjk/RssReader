@@ -5,8 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Media;
 
 namespace RssReader
@@ -16,14 +14,9 @@ namespace RssReader
   /// </summary>
   public class SubscriptionViewModel: INotifyPropertyChanged
   {
-    public SubscriptionViewModel(ReaderLib.Subscription Subscription, ItemsControl EntriesWidget)
+    public SubscriptionViewModel(ReaderLib.Subscription Subscription)
     {
-      this.EntriesWidget = EntriesWidget;
       this.Subscription = Subscription;
-      this.EntriesWidget.Loaded += (sender, e) =>
-      {
-        UpdateSortOrder();
-      };
       foreach (Entry entry in from kvp in Subscription.Entries
                               orderby kvp.Value.Serial descending
                               select kvp.Value) {
@@ -32,8 +25,6 @@ namespace RssReader
       this.Subscription.EntryAdded += ModelEntryAdded;
       this.Subscription.PropertyChanged += ModelPropertyChanged;
     }
-
-    public ItemsControl EntriesWidget;
 
     public Subscription Subscription;
 
@@ -120,68 +111,6 @@ namespace RssReader
       {
         WebSubscription ws = Subscription as WebSubscription;
         return ws != null ? ws.PublicURI : null;
-      }
-    }
-
-    #endregion
-
-    #region Sorting
-
-    public bool SortByDate
-    {
-      get
-      {
-        return _SortByDate;
-      }
-      set
-      {
-        if (value != _SortByDate) {
-          _SortByDate = value;
-          if (value == true) {
-            SortByUnread = false;
-          }
-          OnPropertyChanged();
-          UpdateSortOrder();
-        }
-      }
-    }
-
-    private bool _SortByDate = false;
-
-    public bool SortByUnread
-    {
-      get
-      {
-        return _SortByUnread;
-      }
-      set
-      {
-        if (value != _SortByUnread) {
-          _SortByUnread = value;
-          if (value == true) {
-            SortByDate = false;
-          }
-          OnPropertyChanged();
-          UpdateSortOrder();
-        }
-      }
-    }
-
-    private bool _SortByUnread = false;
-
-    private void UpdateSortOrder()
-    {
-      if (EntriesWidget != null
-         && EntriesWidget.ItemsSource != null) {
-        ICollectionView dataView = CollectionViewSource.GetDefaultView(EntriesWidget.ItemsSource);
-        dataView.SortDescriptions.Clear();
-        if(SortByDate) {
-          dataView.SortDescriptions.Add(new SortDescription("Date", ListSortDirection.Descending));
-        } else if(SortByUnread) {
-          dataView.SortDescriptions.Add(new SortDescription("Unread", ListSortDirection.Descending));
-          dataView.SortDescriptions.Add(new SortDescription("Date", ListSortDirection.Descending));
-        }
-        dataView.SortDescriptions.Add(new SortDescription("Serial", ListSortDirection.Descending));
       }
     }
 

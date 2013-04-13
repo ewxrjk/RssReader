@@ -24,7 +24,7 @@ namespace RssReader
       };
       Subscriptions = new ObservableCollection<SubscriptionViewModel>();
       foreach (Subscription sub in _Subscriptions.Subscriptions) {
-        Subscriptions.Add(new SubscriptionViewModel(sub, this.EntriesWidget));
+        Subscriptions.Add(new SubscriptionViewModel(sub));
       }
       _Subscriptions.SubscriptionAdded += SubscriptionAdded;
       _Subscriptions.SubscriptionRemoved += SubscriptionRemoved;
@@ -41,7 +41,7 @@ namespace RssReader
 
     private void SubscriptionAdded(Subscription subscription)
     {
-      Subscriptions.Add(new SubscriptionViewModel(subscription, this.EntriesWidget));
+      Subscriptions.Add(new SubscriptionViewModel(subscription));
     }
 
     private void SubscriptionRemoved(int index)
