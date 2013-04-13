@@ -58,7 +58,7 @@ namespace RssReader
       }
       _Subscriptions = sl;
       _Subscriptions.BackgroundRegister(Dispatch, Error);
-      Subscriptions = new SubscriptionListViewModel(_Subscriptions, SubscriptionsWidget);
+      Subscriptions = new SubscriptionListViewModel(_Subscriptions, SubscriptionsWidget, EntriesWidget);
       this.DataContext = this;
     }
 
@@ -250,12 +250,12 @@ namespace RssReader
 
     private void SelectSubscription(object sender, SelectionChangedEventArgs e)
     {
+      OnPropertyChanged("SelectedSubscriptionViewModel");
       OnPropertyChanged("SubscriptionSelected");
       OnPropertyChanged("SubscriptionCanReadOnline");
       OnPropertyChanged("SubscriptionHasUnreadEntries");
       if (OldSubscriptionViewModel != null) {
         SelectedSubscriptionViewModel.PropertyChanged -= SubscriptionViewModelPropertyChanged;
-
       }
       if (SelectedSubscriptionViewModel != null) {
         SelectedSubscriptionViewModel.PropertyChanged += SubscriptionViewModelPropertyChanged;
@@ -274,7 +274,7 @@ namespace RssReader
 
     #region Subscription Context Menu
 
-    private SubscriptionViewModel SelectedSubscriptionViewModel
+    public SubscriptionViewModel SelectedSubscriptionViewModel
     {
       get
       {

@@ -56,6 +56,8 @@
         <MenuItem Header="Show only unread subscriptions" IsCheckable="True" IsChecked="{Binding Subscriptions.ShowUnreadOnly}"/>
       </MenuItem>
       <MenuItem Header="_Subscription">
+        <MenuItem Header="Most recent entries first" IsCheckable="True" IsEnabled="{Binding SubscriptionSelected}" IsChecked="{Binding SelectedSubscriptionViewModel.SortByDate}"/>
+        <MenuItem Header="Unread entries first" IsCheckable="True" IsEnabled="{Binding SubscriptionSelected}" IsChecked="{Binding SelectedSubscriptionViewModel.SortByUnread}"/>
         <MenuItem Header="_Read online" Click="ReadSubscriptionOnline" IsEnabled="{Binding SubscriptionCanReadOnline}" ToolTip="{Binding PublicURI}"/>
         <MenuItem Header="_Mark all read" Click="MarkSubscriptionRead" IsEnabled="{Binding SubscriptionHasUnreadEntries}"/>
         <MenuItem Header="_Edit" Click="EditSubscription" IsEnabled="{Binding SubscriptionSelected}"/>

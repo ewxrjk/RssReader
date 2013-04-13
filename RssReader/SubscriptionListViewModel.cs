@@ -12,18 +12,19 @@ namespace RssReader
   /// </summary>
   public class SubscriptionListViewModel : INotifyPropertyChanged
   {
-    public SubscriptionListViewModel(SubscriptionList sl, ListBox subscriptionsWidget)
+    public SubscriptionListViewModel(SubscriptionList sl, ListBox SubscriptionsWidget, ItemsControl EntriesWidget)
     {
-      _Subscriptions = sl;
-      SubscriptionsWidget = subscriptionsWidget;
-      subscriptionsWidget.Loaded += (sender, e) =>
+      this._Subscriptions = sl;
+      this.SubscriptionsWidget = SubscriptionsWidget;
+      this.EntriesWidget = EntriesWidget;
+      this.SubscriptionsWidget.Loaded += (sender, e) =>
       {
         UpdateSortOrder();
         UpdateFilter();
       };
       Subscriptions = new ObservableCollection<SubscriptionViewModel>();
       foreach (Subscription sub in _Subscriptions.Subscriptions) {
-        Subscriptions.Add(new SubscriptionViewModel(sub));
+        Subscriptions.Add(new SubscriptionViewModel(sub, this.EntriesWidget));
       }
       _Subscriptions.SubscriptionAdded += SubscriptionAdded;
       _Subscriptions.SubscriptionRemoved += SubscriptionRemoved;
@@ -32,6 +33,7 @@ namespace RssReader
     }
 
     private ListBox SubscriptionsWidget;
+    private ItemsControl EntriesWidget;
 
     private SubscriptionList _Subscriptions;
 
@@ -39,7 +41,7 @@ namespace RssReader
 
     private void SubscriptionAdded(Subscription subscription)
     {
-      Subscriptions.Add(new SubscriptionViewModel(subscription));
+      Subscriptions.Add(new SubscriptionViewModel(subscription, this.EntriesWidget));
     }
 
     private void SubscriptionRemoved(int index)

@@ -128,6 +128,14 @@ namespace RssReader
       }
     }
 
+    public int Serial
+    {
+      get
+      {
+        return _Entry.Serial;
+      }
+    }
+
     #endregion
 
     #region INotifyPropertyChanged
