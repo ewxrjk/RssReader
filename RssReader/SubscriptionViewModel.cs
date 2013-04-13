@@ -1,4 +1,5 @@
 ﻿using ReaderLib;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -67,9 +68,7 @@ namespace RssReader
     {
       get
       {
-        return (from entry in Entries
-                where entry.Read == false
-                select entry).Count();
+        return GetUnreadEntries().Count();
       }
     }
 
@@ -124,11 +123,11 @@ namespace RssReader
       System.Diagnostics.Process.Start(((WebSubscription)Subscription).PublicURI.ToString());
     }
 
-    public void MarkAllEntriesRead()
+    public IEnumerable<EntryViewModel> GetUnreadEntries()
     {
-      foreach (EntryViewModel evm in Entries) {
-        evm.Read = true;
-      }
+      return from entry in Entries
+             where entry.Read == false
+             select entry;
     }
 
     #endregion

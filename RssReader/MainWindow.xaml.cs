@@ -294,7 +294,26 @@ namespace RssReader
 
     private void MarkSubscriptionRead(object sender, RoutedEventArgs e)
     {
-      SelectedSubscriptionViewModel.MarkAllEntriesRead();
+      // We need to tie down the things affected, i.e. and not use anything
+      // mutable inside the closures.
+      Subscription subscription = SelectedSubscriptionViewModel.Subscription;
+      EntryViewModel[] affectedEntries = SelectedSubscriptionViewModel.GetUnreadEntries().ToArray();
+      Perform(new Performable()
+      {
+        Description = string.Format("mark “{0}” read", subscription.Title),
+        Redo = () => 
+        {
+          foreach (EntryViewModel evm in affectedEntries) {
+            evm.Read = true;
+          }
+        },
+        Undo = () =>
+        {
+          foreach (EntryViewModel evm in affectedEntries) {
+            evm.Read = false;
+          }
+        }
+      });
     }
 
     private void EditSubscription(object sender, RoutedEventArgs e)
@@ -312,7 +331,7 @@ namespace RssReader
       Subscription subscription = SelectedSubscriptionViewModel.Subscription;
       Perform(new Performable()
       {
-        Description = string.Format("unsubscribe from {0}", subscription.Title),
+        Description = string.Format("unsubscribe from “{0}”", subscription.Title),
         Redo = () => _Subscriptions.Remove(subscription),
         Undo = () => _Subscriptions.Add(subscription)
       });
