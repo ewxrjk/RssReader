@@ -70,5 +70,17 @@ namespace RssReader.Properties {
                 this["SortSubscriptionsByUnread"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowAllSubscriptions {
+            get {
+                return ((bool)(this["ShowAllSubscriptions"]));
+            }
+            set {
+                this["ShowAllSubscriptions"] = value;
+            }
+        }
     }
 }

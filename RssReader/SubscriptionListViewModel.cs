@@ -28,7 +28,6 @@ namespace RssReader
       }
       _Subscriptions.SubscriptionAdded += SubscriptionAdded;
       _Subscriptions.SubscriptionRemoved += SubscriptionRemoved;
-      ShowAll = true;
     }
 
     private ListBox SubscriptionsWidget;
@@ -113,11 +112,17 @@ namespace RssReader
     {
       get
       {
-        return !ShowUnreadOnly;
+        return Properties.Settings.Default.ShowAllSubscriptions;
       }
       set
       {
-        ShowUnreadOnly = !value;
+        if (value != Properties.Settings.Default.ShowAllSubscriptions) {
+          Properties.Settings.Default.ShowAllSubscriptions = value;
+          OnPropertyChanged();
+          OnPropertyChanged("ShowUnreadOnly");
+          UpdateFilter();
+          Properties.Settings.Default.Save();
+        }
       }
     }
 
@@ -125,16 +130,11 @@ namespace RssReader
     {
       get
       {
-        return _ShowUnreadOnly;
+        return !Properties.Settings.Default.ShowAllSubscriptions;
       }
       set
       {
-        if (value != _ShowUnreadOnly) {
-          _ShowUnreadOnly = value;
-          OnPropertyChanged();
-          OnPropertyChanged("ShowAll");
-          UpdateFilter();
-        }
+        ShowAll = !value;
       }
     }
 
@@ -143,11 +143,11 @@ namespace RssReader
       if (SubscriptionsWidget != null
          && SubscriptionsWidget.ItemsSource != null) {
         ICollectionView dataView = CollectionViewSource.GetDefaultView(SubscriptionsWidget.ItemsSource);
-        if (ShowUnreadOnly) {
-          dataView.Filter = ShowUnreadOnlyFilter;
+        if (Properties.Settings.Default.ShowAllSubscriptions) {
+          dataView.Filter = ShowAllFilter;
         }
         else {
-          dataView.Filter = ShowAllFilter;
+          dataView.Filter = ShowUnreadOnlyFilter;
         }
       }
     }
@@ -167,8 +167,6 @@ namespace RssReader
         return false;
       }
     }
-
-    private bool _ShowUnreadOnly;
 
     #endregion
 
