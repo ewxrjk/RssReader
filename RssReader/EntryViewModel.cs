@@ -24,6 +24,9 @@ namespace RssReader
     {
       switch (e.PropertyName) {
         case "Date":
+          OnPropertyChanged(e.PropertyName);
+          OnPropertyChanged("DateString");
+          break;
         case "Title":
         case "URI":
           OnPropertyChanged(e.PropertyName);
