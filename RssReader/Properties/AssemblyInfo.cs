@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("RssReader")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("HalfMoon")]
+[assembly: AssemblyDescription("RSS Reader")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("RssReader")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCompany("Greenend")]
+[assembly: AssemblyProduct("HalfMoon")]
+[assembly: AssemblyCopyright("Copyright © 2013 Richard Kettlewell")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
