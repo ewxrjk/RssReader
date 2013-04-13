@@ -11,6 +11,7 @@
       <MenuItem Header="_Read online" Click="ReadSubscriptionOnline" IsEnabled="{Binding CanReadOnline}" ToolTip="{Binding PublicURI}"/>
       <MenuItem Header="_Mark all read" Click="MarkSubscriptionRead" IsEnabled="{Binding HasUnreadEntries}"/>
       <MenuItem Header="_Edit" Click="EditSubscription"/>
+      <Separator/>
       <MenuItem Header="_Unsubscribe" Click="UnsubscribeSubscription"/>
     </ContextMenu>
   </Window.Resources>
@@ -45,6 +46,7 @@
         <MenuItem Header="{Binding UndoDescription}" IsEnabled="{Binding UndoEnabled}" Command="ApplicationCommands.Undo"/>
         <MenuItem Header="{Binding RedoDescription}" IsEnabled="{Binding RedoEnabled}" Command="ApplicationCommands.Redo"/>
         <MenuItem Header="_Subscribe" Command="{x:Static local:MainWindow.SubscribeCommand}"/>
+        <Separator/>
         <MenuItem Header="_Unsubscribe" IsEnabled="{Binding SubscriptionSelected}" Click="UnsubscribeSubscription"/>
       </MenuItem>
       <MenuItem Header="_View">
@@ -55,6 +57,7 @@
         <MenuItem Header="_Read online" Click="ReadSubscriptionOnline" IsEnabled="{Binding SubscriptionCanReadOnline}" ToolTip="{Binding PublicURI}"/>
         <MenuItem Header="_Mark all read" Click="MarkSubscriptionRead" IsEnabled="{Binding SubscriptionHasUnreadEntries}"/>
         <MenuItem Header="_Edit" Click="EditSubscription" IsEnabled="{Binding SubscriptionSelected}"/>
+        <Separator/>
         <MenuItem Header="_Unsubscribe" Click="UnsubscribeSubscription" IsEnabled="{Binding SubscriptionSelected}"/>
       </MenuItem>
       <MenuItem Header="_Help">
