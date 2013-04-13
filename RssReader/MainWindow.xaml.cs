@@ -373,43 +373,43 @@ namespace RssReader
     {
       get
       {
-        return _SortEntriesByDate;
+        return Properties.Settings.Default.SortEntriesByDate;
       }
       set
       {
-        if (value != _SortEntriesByDate) {
-          _SortEntriesByDate = value;
+        if (value != Properties.Settings.Default.SortEntriesByDate) {
+          Properties.Settings.Default.SortEntriesByDate = value;
           if (value == true) {
-            SortEntriesByUnread = false;
+            Properties.Settings.Default.SortEntriesByUnread = false;
+            OnPropertyChanged("SortEntriesByUnread");
           }
           OnPropertyChanged();
           UpdateEntriesSortOrder();
+          Properties.Settings.Default.Save();
         }
       }
     }
-
-    private bool _SortEntriesByDate = false;
 
     public bool SortEntriesByUnread
     {
       get
       {
-        return _SortEntriesByUnread;
+        return Properties.Settings.Default.SortEntriesByUnread;
       }
       set
       {
-        if (value != _SortEntriesByUnread) {
-          _SortEntriesByUnread = value;
+        if (value != Properties.Settings.Default.SortEntriesByUnread) {
+          Properties.Settings.Default.SortEntriesByUnread = value;
           if (value == true) {
-            SortEntriesByDate = false;
+            Properties.Settings.Default.SortEntriesByDate = false;
+            OnPropertyChanged("SortEntriesByDate");
           }
           OnPropertyChanged();
           UpdateEntriesSortOrder();
+          Properties.Settings.Default.Save();
         }
       }
     }
-
-    private bool _SortEntriesByUnread = false;
 
     private void UpdateEntriesSortOrder()
     {
@@ -417,10 +417,10 @@ namespace RssReader
          && EntriesWidget.ItemsSource != null) {
         ICollectionView dataView = CollectionViewSource.GetDefaultView(EntriesWidget.ItemsSource);
         dataView.SortDescriptions.Clear();
-        if (SortEntriesByDate) {
+        if (Properties.Settings.Default.SortEntriesByDate) {
           dataView.SortDescriptions.Add(new SortDescription("Date", ListSortDirection.Descending));
         }
-        else if (SortEntriesByUnread) {
+        else if (Properties.Settings.Default.SortEntriesByUnread) {
           dataView.SortDescriptions.Add(new SortDescription("Unread", ListSortDirection.Descending));
           dataView.SortDescriptions.Add(new SortDescription("Date", ListSortDirection.Descending));
         }
