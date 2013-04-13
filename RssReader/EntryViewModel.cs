@@ -108,7 +108,7 @@ namespace RssReader
       }
     }
 
-    public string Date
+    public string DateString
     {
       get
       {
@@ -124,6 +124,20 @@ namespace RssReader
         }
         else {
           return "";
+        }
+      }
+    }
+
+    public DateTime Date
+    {
+      get
+      {
+        WebEntry e = _Entry as WebEntry;
+        if (e != null && e.Date != null) {
+          return e.Date;
+        }
+        else {
+          return new DateTime();
         }
       }
     }

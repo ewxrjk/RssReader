@@ -16,7 +16,7 @@
     <Expander.Header>
       <TextBlock FontWeight="{Binding TitleWeight}">
         <Span>
-          <Run Text="{Binding Path=Date, Mode=OneWay}"/>
+          <Run Text="{Binding Path=DateString, Mode=OneWay}"/>
           <Run Text="{Binding Path=Title, Mode=OneWay}"/>
         </Span>
       </TextBlock>
