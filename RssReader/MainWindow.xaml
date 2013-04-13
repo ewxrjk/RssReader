@@ -50,8 +50,10 @@
         <MenuItem Header="_Unsubscribe" IsEnabled="{Binding SubscriptionSelected}" Click="UnsubscribeSubscription"/>
       </MenuItem>
       <MenuItem Header="_View">
-        <MenuItem Header="Sort by name" IsCheckable="True" IsChecked="{Binding Subscriptions.SortByName}"/>
-        <MenuItem Header="Sort by unread" IsCheckable="True" IsChecked="{Binding Subscriptions.SortByUnread}"/>
+        <MenuItem Header="Sort subscriptions by name" IsCheckable="True" IsChecked="{Binding Subscriptions.SortByName}"/>
+        <MenuItem Header="Sort subscriptions by unread" IsCheckable="True" IsChecked="{Binding Subscriptions.SortByUnread}"/>
+        <MenuItem Header="Show all subscriptions" IsCheckable="True" IsChecked="{Binding Subscriptions.ShowAll}"/>
+        <MenuItem Header="Show only unread subscriptions" IsCheckable="True" IsChecked="{Binding Subscriptions.ShowUnreadOnly}"/>
       </MenuItem>
       <MenuItem Header="_Subscription">
         <MenuItem Header="_Read online" Click="ReadSubscriptionOnline" IsEnabled="{Binding SubscriptionCanReadOnline}" ToolTip="{Binding PublicURI}"/>

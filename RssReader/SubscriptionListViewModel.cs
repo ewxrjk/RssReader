@@ -10,13 +10,17 @@ namespace RssReader
   /// <summary>
   /// View model for a subscription list
   /// </summary>
-  public class SubscriptionListViewModel: INotifyPropertyChanged
+  public class SubscriptionListViewModel : INotifyPropertyChanged
   {
     public SubscriptionListViewModel(SubscriptionList sl, ListBox subscriptionsWidget)
     {
       _Subscriptions = sl;
       SubscriptionsWidget = subscriptionsWidget;
-      subscriptionsWidget.Loaded += (sender, e) => { UpdateSortOrder(); };
+      subscriptionsWidget.Loaded += (sender, e) =>
+      {
+        UpdateSortOrder();
+        UpdateFilter();
+      };
       Subscriptions = new ObservableCollection<SubscriptionViewModel>();
       foreach (Subscription sub in _Subscriptions.Subscriptions) {
         Subscriptions.Add(new SubscriptionViewModel(sub));
@@ -24,6 +28,7 @@ namespace RssReader
       _Subscriptions.SubscriptionAdded += SubscriptionAdded;
       _Subscriptions.SubscriptionRemoved += SubscriptionRemoved;
       SortOrder = SortBy.Unread;
+      ShowAll = true;
     }
 
     private ListBox SubscriptionsWidget;
@@ -41,6 +46,8 @@ namespace RssReader
     {
       Subscriptions.RemoveAt(index);
     }
+
+    #region Sorting
 
     public enum SortBy
     {
@@ -108,6 +115,73 @@ namespace RssReader
         SortOrder = SortBy.Unread;
       }
     }
+
+    #endregion
+
+    #region Filtering
+
+    public bool ShowAll
+    {
+      get
+      {
+        return !ShowUnreadOnly;
+      }
+      set
+      {
+        ShowUnreadOnly = !value;
+      }
+    }
+
+    public bool ShowUnreadOnly
+    {
+      get
+      {
+        return _ShowUnreadOnly;
+      }
+      set
+      {
+        if (value != _ShowUnreadOnly) {
+          _ShowUnreadOnly = value;
+          OnPropertyChanged();
+          OnPropertyChanged("ShowAll");
+          UpdateFilter();
+        }
+      }
+    }
+
+    private void UpdateFilter()
+    {
+      if (SubscriptionsWidget != null
+         && SubscriptionsWidget.ItemsSource != null) {
+        ICollectionView dataView = CollectionViewSource.GetDefaultView(SubscriptionsWidget.ItemsSource);
+        if (ShowUnreadOnly) {
+          dataView.Filter = ShowUnreadOnlyFilter;
+        }
+        else {
+          dataView.Filter = ShowAllFilter;
+        }
+      }
+    }
+
+    static private bool ShowAllFilter(object o)
+    {
+      return true;
+    }
+
+    static private bool ShowUnreadOnlyFilter(object o)
+    {
+      SubscriptionViewModel svm = o as SubscriptionViewModel;
+      if (svm != null) {
+        return svm.HasUnreadEntries;
+      }
+      else {
+        return false;
+      }
+    }
+
+    private bool _ShowUnreadOnly;
+
+    #endregion
 
     #region INotifyPropertyChanged
 
