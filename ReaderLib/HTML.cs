@@ -28,6 +28,13 @@ namespace ReaderLib.HTML
   /// </summary>
   public class Element : Node
   {
+    public Element()
+    {
+      Name = null;
+      Contents = new List<Node>();
+      Attributes = new Dictionary<string, string>();
+    }
+
     /// <summary>
     /// Element name
     /// </summary>
@@ -42,6 +49,31 @@ namespace ReaderLib.HTML
     /// Attributes of this element
     /// </summary>
     public Dictionary<string, string> Attributes { get; set; }
+
+    public bool IsBlockElement()
+    {
+      return (HTML.Parser.GetElementType(Name) & (Parser.ElementType.Block | Parser.ElementType.BlockSingle)) != 0;
+    }
+
+    public bool IsListElement()
+    {
+      return (HTML.Parser.GetElementType(Name) & (Parser.ElementType.ListContainer)) != 0;
+    }
+
+    public bool IsTableElement()
+    {
+      return (HTML.Parser.GetElementType(Name) & (Parser.ElementType.Table)) != 0;
+    }
+
+    public bool IsInlineElement()
+    {
+      return (HTML.Parser.GetElementType(Name) & (Parser.ElementType.Inline | Parser.ElementType.InlineSingle)) != 0;
+    }
+
+    public bool IsFlowContainer()
+    {
+      return (HTML.Parser.GetElementType(Name) & (Parser.ElementType.FlowContainer)) != 0;
+    }
 
     /// <summary>
     /// Find the first child element with a given name

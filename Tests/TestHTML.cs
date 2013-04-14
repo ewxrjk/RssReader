@@ -116,13 +116,11 @@ namespace Tests
       HTML.Element li1 = ul.Contents[0] as HTML.Element;
       Assert.AreEqual("li", li1.Name);
       Assert.AreEqual(1, li1.Contents.Count);
-      HTML.Element p1 = li1.Contents[0] as HTML.Element;
-      Assert.AreEqual("one", (p1.Contents[0] as HTML.Cdata).Content);
+      Assert.AreEqual("one", (li1.Contents[0] as HTML.Cdata).Content);
       HTML.Element li2 = ul.Contents[1] as HTML.Element;
       Assert.AreEqual("li", li2.Name);
       Assert.AreEqual(1, li2.Contents.Count);
-      HTML.Element p2 = li2.Contents[0] as HTML.Element;
-      Assert.AreEqual("two", (p2.Contents[0] as HTML.Cdata).Content);
+      Assert.AreEqual("two", (li2.Contents[0] as HTML.Cdata).Content);
 
       d = HTML.Document.Parse("<ul><li><p>one<p>two</ul>");
       ul = d.HTML.Follow("body.ul");
@@ -193,15 +191,15 @@ namespace Tests
     [TestMethod]
     public void TestHTMLTable()
     {
-      HTML.Document d = HTML.Document.Parse("<table><tr><td>a</td><td>b</td><tr><td>c</td>");
-      Assert.AreEqual("<html><head></head><body><table><tr><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
+      HTML.Document d = HTML.Document.Parse("<table><tr><td>a</td><td>b</td><tr><td><p>c</td>");
+      Assert.AreEqual("<html><head></head><body><table><tr><td>a</td><td>b</td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
     }
 
     [TestMethod]
     public void TestHTMLSpaceTable()
     {
       HTML.Document d = HTML.Document.Parse("<table>\n <tr>\n  <td>a</td>\n  <td>b</td>\n <tr>\n  <td>c</td>\n</table>\n");
-      Assert.AreEqual("<html><head></head><body><table><tr><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
+      Assert.AreEqual("<html><head></head><body><table><tr><td>a</td><td>b</td></tr><tr><td>c</td></tr></table></body></html>", d.ToString());
     }
 
     [TestMethod]
@@ -252,6 +250,24 @@ namespace Tests
     {
       HTML.Document d = HTML.Document.Parse("<html><head><title>T</title></head><body>B</body></html>");
       Assert.AreEqual("<html><head><title>T</title></head><body><p>B</p></body></html>", d.ToString());
+    }
+
+    [TestMethod]
+    public void TestHTMLBlockQuote()
+    {
+      HTML.Document d = HTML.Document.Parse("<blockquote><p>T</blockquote>");
+      Assert.AreEqual("<html><head></head><body><blockquote><p>T</p></blockquote></body></html>", d.ToString());
+      d = HTML.Document.Parse("<blockquote>T</blockquote>");
+      Assert.AreEqual("<html><head></head><body><blockquote>T</blockquote></body></html>", d.ToString());
+    }
+
+    [TestMethod]
+    public void TestHTMLFlowContext()
+    {
+      HTML.Document d = HTML.Document.Parse("<blockquote>A<p>B</blockquote>");
+      Assert.AreEqual("<html><head></head><body><blockquote><p>A</p><p>B</p></blockquote></body></html>", d.ToString());
+      d = HTML.Document.Parse("<blockquote>A</pre><p>B</blockquote>");
+      Assert.AreEqual("<html><head></head><body><blockquote><pre>A</pre><p>B</p></blockquote></body></html>", d.ToString());
     }
 
   }

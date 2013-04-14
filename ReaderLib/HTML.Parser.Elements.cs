@@ -1,24 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ReaderLib.HTML
 {
   public partial class Parser
   {
+    [Flags]
     internal enum ElementType {
-      Other,
-      Block,
-      BlockSingle,
-      Inline,
-      InlineSingle,
-      ListContainer,
-      ListElement,
-      Table,
-      TableRow,
-      TableCell,
-      Head,
-      HeadSpecial,
-      HeadSingle,
-      Ignore,
+      Other = 1,
+      Block = 2,
+      BlockSingle = 4,
+      FlowContainer = 8,
+      Inline = 16,
+      InlineSingle = 32,
+      ListContainer = 64,
+      ListElement = 128,
+      Table = 256,
+      TableRow = 512,
+      TableCell = 1024,
+      HeadContent = 2048,
+      HeadSpecial = 4096,
+      HeadSingle = 8192,
+      Ignore = 16384,
+      Body = 32768,
+      Head = 65536,
+      HTML = 131072,
     };
 
     internal static ElementType GetElementType(string name)
@@ -42,8 +48,8 @@ namespace ReaderLib.HTML
       { "basefont", ElementType.Ignore },
       { "bdo", ElementType.Ignore },
       { "big", ElementType.Inline },
-      { "blockquote", ElementType.Block },
-      { "body", ElementType.Ignore },
+      { "blockquote", ElementType.FlowContainer },
+      { "body", ElementType.Body },
       { "br", ElementType.InlineSingle },
       { "button", ElementType.Inline },
       { "caption", ElementType.Ignore },
@@ -56,7 +62,7 @@ namespace ReaderLib.HTML
       { "del", ElementType.Ignore },
       { "dfn", ElementType.Inline },
       { "dir", ElementType.Ignore },
-      { "div", ElementType.Block },
+      { "div", ElementType.FlowContainer },
       { "dl", ElementType.Block },
       { "dt", ElementType.Ignore },
       { "em", ElementType.Inline },
@@ -71,9 +77,9 @@ namespace ReaderLib.HTML
       { "h4", ElementType.Block },
       { "h5", ElementType.Block },
       { "h6", ElementType.Block },
-      { "head", ElementType.Ignore },
+      { "head", ElementType.Head },
       { "hr", ElementType.BlockSingle },
-      { "html", ElementType.Ignore },
+      { "html", ElementType.HTML },
       { "i", ElementType.Inline },
       { "iframe", ElementType.Ignore },
       { "img", ElementType.InlineSingle },
@@ -116,7 +122,7 @@ namespace ReaderLib.HTML
       { "tfoot", ElementType.Ignore },
       { "th", ElementType.TableCell },
       { "thead", ElementType.Ignore },
-      { "title", ElementType.Head },
+      { "title", ElementType.HeadContent },
       { "tr", ElementType.TableRow },
       { "tt", ElementType.Inline },
       { "u", ElementType.Inline },
