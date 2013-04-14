@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using HTML = ReaderLib.HTML;
 
 namespace RssReader
@@ -106,7 +107,9 @@ namespace RssReader
           case "table":
             block = ConvertTable(e);
             break;
-          // TODO <hr>?
+          case "hr":
+            block = HorizontalRule();
+            break;
           default:
             block = ConvertParagraph(e, TextFont, FontWeights.Normal, 1.0, true);
             break;
@@ -142,6 +145,20 @@ namespace RssReader
         }
         return content;
       }
+    }
+
+    private Block HorizontalRule()
+    {
+      return new BlockUIContainer()
+      {
+        Child = new Line()
+          {
+            Stretch = Stretch.Fill,
+            X2 = 1,
+            Stroke = Brushes.Black,
+            SnapsToDevicePixels = true,
+          }
+      };
     }
 
     #region Table Rendering
