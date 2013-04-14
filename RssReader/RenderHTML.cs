@@ -36,6 +36,11 @@ namespace RssReader
     public FontFamily HeadingFont = new FontFamily("Global Sans Serif");
 
     /// <summary>
+    /// Font size
+    /// </summary>
+    public double TextSize = 12.0;
+
+    /// <summary>
     /// Containing scrollviewer
     /// </summary>
     public ScrollViewer ParentScrollViewer = null;
@@ -44,6 +49,27 @@ namespace RssReader
     /// Base URI for relative hyperlinks
     /// </summary>
     public Uri BaseUri = null;
+
+    private class Context
+    {
+      public Context(RenderHTML parent)
+      {
+        fontFamily = parent.TextFont;
+        fontSize = parent.TextSize;
+        fontWeight = FontWeights.Normal;
+      }
+
+      public Context(Context parent)
+      {
+        this.fontFamily = parent.fontFamily;
+        this.fontSize = parent.fontSize;
+        this.fontWeight = parent.fontWeight;
+      }
+
+      public FontFamily fontFamily;
+      public double fontSize;
+      public FontWeight fontWeight;
+    }
 
     /// <summary>
     /// Render an HTML document
@@ -60,7 +86,7 @@ namespace RssReader
                       Source = ParentScrollViewer,
                       Path = new PropertyPath("ViewportWidth"),
                     });
-      fd.Blocks.AddRange(ConvertFlowsOrBlocks(document.HTML.Follow("body")));
+      fd.Blocks.AddRange(ConvertFlowsOrBlocks(document.HTML.Follow("body"), new Context(this)));
       return new RichTextBox() { 
         Document = fd,
         IsDocumentEnabled = true,
@@ -69,16 +95,16 @@ namespace RssReader
       };
     }
 
-    private IEnumerable<Block> ConvertFlowsOrBlocks(HTML.Element root)
+    private IEnumerable<Block> ConvertFlowsOrBlocks(HTML.Element root, Context ctx)
     {
       List<Block> blocks = new List<Block>();
       foreach (HTML.Node n in root.Contents) {
-        blocks.AddRange(ConvertFlowOrBlock(n as HTML.Element));
+        blocks.AddRange(ConvertFlowOrBlock(n as HTML.Element, ctx));
       }
       return blocks;
     }
 
-    private IEnumerable<Block> ConvertFlowOrBlock(HTML.Element e)
+    private IEnumerable<Block> ConvertFlowOrBlock(HTML.Element e, Context ctx)
     {
       if (e.IsBlockElement()
           || e.IsListElement()
@@ -86,10 +112,10 @@ namespace RssReader
         Block block;
         switch (e.Name) {
           case "ul":
-            block = ConvertList(e);
+            block = ConvertList(e, ctx);
             break;
           case "ol":
-            List l = ConvertList(e);
+            List l = ConvertList(e, ctx);
             l.StartIndex = 1;
             block = l;
             break;
@@ -99,19 +125,23 @@ namespace RssReader
           case "h4":
           case "h5":
           case "h6":
-            block = ConvertParagraph(e, HeadingFont, FontWeights.Bold, Math.Pow(1.125, '7' - e.Name[1]), true);
+            block = ConvertParagraph(e,
+                                     new Context(ctx) { fontFamily = HeadingFont, fontWeight = FontWeights.Bold, fontSize = TextSize * Math.Pow(1.125, '7' - e.Name[1]) },
+                                     true);
             break;
           case "pre":
-            block = ConvertParagraph(e, MonospaceFont, FontWeights.Normal, 1.0, false);
+            block = ConvertParagraph(e,
+                                     new Context(ctx) { fontFamily = MonospaceFont },
+                                     false);
             break;
           case "table":
-            block = ConvertTable(e);
+            block = ConvertTable(e, ctx);
             break;
           case "hr":
             block = HorizontalRule();
             break;
           default:
-            block = ConvertParagraph(e, TextFont, FontWeights.Normal, 1.0, true);
+            block = ConvertParagraph(e, ctx, true);
             break;
         }
         if (block != null) {
@@ -126,10 +156,10 @@ namespace RssReader
         if (e.Contents.Count > 0
             && (e.Contents[0] is HTML.Cdata
                 || (e.Contents[0] as HTML.Element).IsInlineElement())) {
-          content = new List<Block>() { ConvertParagraph(e, TextFont, FontWeights.Normal, 1.0, true) };
+          content = new List<Block>() { ConvertParagraph(e, ctx, true) };
         }
         else {
-          content = ConvertFlowsOrBlocks(e);
+          content = ConvertFlowsOrBlocks(e, ctx);
         }
         switch (e.Name) {
           case "blockquote":
@@ -163,7 +193,7 @@ namespace RssReader
 
     #region Table Rendering
 
-    private Table ConvertTable(HTML.Element e)
+    private Table ConvertTable(HTML.Element e, Context ctx)
     {
       Table t = new Table();
       TableRowGroup trg = new TableRowGroup();
@@ -179,7 +209,8 @@ namespace RssReader
             ColumnSpan = GetSpan(c, "colspan"),
             RowSpan = GetSpan(c, "rowspan"),
           };
-          tc.Blocks.AddRange(ConvertFlowOrBlock(c));
+          // TODO <th> should be bold
+          tc.Blocks.AddRange(ConvertFlowOrBlock(c, ctx));
           tr.Cells.Add(tc);
           columnNumber += tc.ColumnSpan;
         }
@@ -212,12 +243,12 @@ namespace RssReader
 
     #region Lists
 
-    private List ConvertList(HTML.Element e)
+    private List ConvertList(HTML.Element e, Context ctx)
     {
       List l = new List();
       foreach (HTML.Element ee in e.Contents) {
         ListItem li = new ListItem();
-        li.Blocks.AddRange(ConvertFlowOrBlock(ee));
+        li.Blocks.AddRange(ConvertFlowOrBlock(ee, ctx));
         l.ListItems.Add(li);
       }
       return l;
@@ -229,19 +260,19 @@ namespace RssReader
 
     private char LastCharacter;
 
-    private Paragraph ConvertParagraph(HTML.Element e, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace)
+    private Paragraph ConvertParagraph(HTML.Element e, Context ctx, bool collapseSpace)
     {
       LastCharacter = ' ';
       Paragraph p = new Paragraph();
-      p.Inlines.AddRange(ConvertInlines(e, fontFamily, fontWeight, fontScale, collapseSpace,
+      p.Inlines.AddRange(ConvertInlines(e, ctx, collapseSpace,
                                         new ParagraphSizeTracker() { ParentScrollViewer = ParentScrollViewer }));
       return p.Inlines.Count > 0 ? p : null;
     }
 
-    private IEnumerable<Inline> ConvertInlines(HTML.Element e, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace, ParagraphSizeTracker pst)
+    private IEnumerable<Inline> ConvertInlines(HTML.Element e, Context ctx, bool collapseSpace, ParagraphSizeTracker pst)
     {
       return from i in
-               (from n in e.Contents select ConvertInline(n, fontFamily, fontWeight, fontScale, collapseSpace, pst)) 
+               (from n in e.Contents select ConvertInline(n, ctx, collapseSpace, pst)) 
              where i != null
              select i;
     }
@@ -250,38 +281,64 @@ namespace RssReader
 
     #region Inlines
 
-    private Inline ConvertInline(HTML.Node n, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace, ParagraphSizeTracker pst)
+    private Inline ConvertInline(HTML.Node n, Context ctx, bool collapseSpace, ParagraphSizeTracker pst)
     {
       if (n is HTML.Element) {
-        return ConvertInlineElement((HTML.Element)n, fontFamily, fontWeight, fontScale, collapseSpace, pst);
+        return ConvertInlineElement((HTML.Element)n, ctx, collapseSpace, pst);
       }
       else {
         Inline i = collapseSpace ? ConvertText(((HTML.Cdata)n).Content)
                                  : ConvertFixedText(((HTML.Cdata)n).Content);
         if (i != null) {
-          i.FontSize *= fontScale;
-          i.FontFamily = fontFamily;
-          i.FontWeight = fontWeight;
+          i.FontSize = ctx.fontSize;
+          i.FontFamily = ctx.fontFamily;
+          i.FontWeight = ctx.fontWeight;
         }
         return i;
       }
     }
 
-    private Inline ConvertInlineElement(HTML.Element e, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace, ParagraphSizeTracker pst)
+    private Inline ConvertInlineElement(HTML.Element e, Context ctx, bool collapseSpace, ParagraphSizeTracker pst)
     {
       Span s;
       switch (e.Name) {
         case "b":
-        case "strong": s = new Span(); fontWeight = FontWeights.Bold; break;
+        case "strong":
+          s = new Span();
+          ctx = new Context(ctx) { fontWeight = FontWeights.Bold };
+          break;
         case "i":
-        case "em": s = new Italic(); break;
-        case "u": s = new Underline(); break;
-        case "big": s = new Span(); fontScale *= 1.125; break;
-        case "small": s = new Span(); fontScale /= 1.125; break;
+        case "em":
+          s = new Italic();
+          break;
+        case "u":
+          s = new Underline();
+          break;
+        case "big": {
+            s = new Span();
+            double newSize = ctx.fontSize * 1.25;
+            ctx = new Context(ctx) { fontSize = newSize };
+            break;
+          }
+        case "small": {
+            s = new Span();
+            double newSize = ctx.fontSize / 1.25;
+            ctx = new Context(ctx) { fontSize = newSize };
+            break;
+          }
         case "code":
-        case "tt": s = new Span(); fontFamily = MonospaceFont; break;
-        case "sub": s = new Span(); s.Typography.Variants = FontVariants.Subscript; break;
-        case "sup": s = new Span(); s.Typography.Variants = FontVariants.Superscript; break;
+        case "tt":
+          s = new Span();
+          ctx = new Context(ctx) { fontFamily = MonospaceFont };
+          break;
+        case "sub":
+          s = new Span();
+          s.Typography.Variants = FontVariants.Subscript;
+          break;
+        case "sup":
+          s = new Span();
+          s.Typography.Variants = FontVariants.Superscript;
+          break;
         case "a":
           s = RenderHyperlink(e);
           break;
@@ -292,7 +349,7 @@ namespace RssReader
         // TODO map, anything else?
         default: s = new Span(); break;
       }
-      s.Inlines.AddRange(ConvertInlines(e, fontFamily, fontWeight, fontScale, collapseSpace, pst));
+      s.Inlines.AddRange(ConvertInlines(e, ctx, collapseSpace, pst));
       return s;
     }
 
