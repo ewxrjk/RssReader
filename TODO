@@ -5,12 +5,7 @@ Menu bar:
    Edit
      Search
 
-Entry visibility
-  Unread only
-
 Use async instead of a background thread?
 More keyboard shortcuts?
 Missing HTML support?
 Honor type attributes in atom properly
-Relative URIs don't work
-....and worse, they crash the reader

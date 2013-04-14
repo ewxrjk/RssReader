@@ -123,8 +123,9 @@ namespace RssReader
 
     public bool Acceptable
     {
-      get {
-        return _Subscription.Parent != null || (Checking ==false
+      get
+      {
+        return _Subscription.Parent != null || (Checking == false
                                                 && LastChecked != null
                                                 && NewURI.Text == LastChecked
                                                 && _CheckFailed == null);
@@ -309,7 +310,8 @@ namespace RssReader
         {
           try {
             ((WebSubscription)_Subscription).Configure(Dispatcher.Invoke, CheckError, new Uri(LastChecked));
-          } catch(Exception e) {
+          }
+          catch (Exception e) {
             Dispatcher.Invoke(() => CheckError(e));
           }
           Dispatcher.Invoke(() => CheckComplete(_Subscription));
@@ -369,6 +371,7 @@ namespace RssReader
       OnPropertyChanged("Checkable");
       OnPropertyChanged("LastError");
     }
+
     #endregion
 
     #region INotifyPropertyChanged
