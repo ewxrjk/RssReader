@@ -209,8 +209,12 @@ namespace RssReader
             ColumnSpan = GetSpan(c, "colspan"),
             RowSpan = GetSpan(c, "rowspan"),
           };
-          // TODO <th> should be bold
-          tc.Blocks.AddRange(ConvertFlowOrBlock(c, ctx));
+          if (c.Name == "th") {
+            tc.Blocks.AddRange(ConvertFlowOrBlock(c, new Context(ctx) { fontWeight = FontWeights.Bold }));
+          }
+          else {
+            tc.Blocks.AddRange(ConvertFlowOrBlock(c, ctx));
+          }
           tr.Cells.Add(tc);
           columnNumber += tc.ColumnSpan;
         }
