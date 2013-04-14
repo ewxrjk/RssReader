@@ -40,6 +40,7 @@
       <MenuItem Header="_File">
         <MenuItem Header="_Import" Command="{x:Static local:MainWindow.ImportCommand}"/>
         <MenuItem Header="_Error Log" Command="{x:Static local:MainWindow.OpenErrorLogCommand}"/>
+        <Separator/>
         <MenuItem Header="_Close" Command="ApplicationCommands.Close"></MenuItem>
       </MenuItem>
       <MenuItem Header="_Edit">
@@ -52,14 +53,17 @@
       <MenuItem Header="_View">
         <MenuItem Header="Sort subscriptions by name" IsCheckable="True" IsChecked="{Binding Subscriptions.SortByName}"/>
         <MenuItem Header="Sort subscriptions by unread" IsCheckable="True" IsChecked="{Binding Subscriptions.SortByUnread}"/>
+        <Separator/>
         <MenuItem Header="Show all subscriptions" IsCheckable="True" IsChecked="{Binding Subscriptions.ShowAll}"/>
         <MenuItem Header="Show only unread subscriptions" IsCheckable="True" IsChecked="{Binding Subscriptions.ShowUnreadOnly}"/>
       </MenuItem>
       <MenuItem Header="_Subscription">
         <MenuItem Header="Most recent entries first" IsCheckable="True" IsEnabled="{Binding SubscriptionSelected}" IsChecked="{Binding SortEntriesByDate}"/>
         <MenuItem Header="Unread entries first" IsCheckable="True" IsEnabled="{Binding SubscriptionSelected}" IsChecked="{Binding SortEntriesByUnread}"/>
+        <Separator/>
         <MenuItem Header="Show all entries" IsCheckable="True" IsChecked="{Binding ShowAllEntries}"/>
         <MenuItem Header="Show only unread entries" IsCheckable="True" IsChecked="{Binding ShowUnreadEntriesOnly}"/>
+        <Separator/>
         <MenuItem Header="_Read online" Click="ReadSubscriptionOnline" IsEnabled="{Binding SubscriptionCanReadOnline}" ToolTip="{Binding PublicURI}"/>
         <MenuItem Header="_Mark all read" Click="MarkSubscriptionRead" IsEnabled="{Binding SubscriptionHasUnreadEntries}"/>
         <MenuItem Header="_Edit" Click="EditSubscription" IsEnabled="{Binding SubscriptionSelected}"/>
