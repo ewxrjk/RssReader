@@ -11,5 +11,6 @@ Entry visibility
 Use async instead of a background thread?
 More keyboard shortcuts?
 Missing HTML support?
-  <blockquote>
 Honor type attributes in atom properly
+Relative URIs don't work
+....and worse, they crash the reader

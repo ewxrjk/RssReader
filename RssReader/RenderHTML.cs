@@ -54,7 +54,7 @@ namespace RssReader
                       Source = ParentScrollViewer,
                       Path = new PropertyPath("ViewportWidth"),
                     });
-      fd.Blocks.AddRange(ConvertBlocks(document.HTML.Follow("body")));
+      fd.Blocks.AddRange(ConvertFlowsOrBlocks(document.HTML.Follow("body")));
       return new RichTextBox() { 
         Document = fd,
         IsDocumentEnabled = true,
@@ -63,36 +63,79 @@ namespace RssReader
       };
     }
 
-    private IEnumerable<Block> ConvertBlocks(HTML.Element root)
+    private IEnumerable<Block> ConvertFlowsOrBlocks(HTML.Element root)
     {
-      return from block in
-               (from element in root.Contents select ConvertBlock(element as HTML.Element))
-             where block != null
-             select block;
+      List<Block> blocks = new List<Block>();
+      foreach (HTML.Node n in root.Contents) {
+        blocks.AddRange(ConvertFlowOrBlock(n as HTML.Element));
+      }
+      return blocks;
     }
 
-    private Block ConvertBlock(HTML.Element e)
+    private IEnumerable<Block> ConvertFlowOrBlock(HTML.Element e)
     {
-      switch (e.Name) {
-        case "ul":
-          return ConvertList(e);
-        case "ol":
-          List l = ConvertList(e);
-          l.StartIndex = 1;
-          return l;
-        case "h1":
-        case "h2":
-        case "h3":
-        case "h4":
-        case "h5":
-        case "h6":
-          return ConvertParagraph(e, HeadingFont, FontWeights.Bold, Math.Pow(1.125, '7' - e.Name[1]));
-        case "pre":
-          return ConvertParagraph(e, MonospaceFont, FontWeights.Normal, 1.0, false);
-        case "table":
-          return ConvertTable(e);
-        default:
-          return ConvertParagraph(e, TextFont, FontWeights.Normal, 1.0);
+      if (e.IsBlockElement()
+          || e.IsListElement()
+          || e.IsTableElement() ) {
+        Block block;
+        switch (e.Name) {
+          case "ul":
+            block = ConvertList(e);
+            break;
+          case "ol":
+            List l = ConvertList(e);
+            l.StartIndex = 1;
+            block = l;
+            break;
+          case "h1":
+          case "h2":
+          case "h3":
+          case "h4":
+          case "h5":
+          case "h6":
+            block = ConvertParagraph(e, HeadingFont, FontWeights.Bold, Math.Pow(1.125, '7' - e.Name[1]), true);
+            break;
+          case "pre":
+            block = ConvertParagraph(e, MonospaceFont, FontWeights.Normal, 1.0, false);
+            break;
+          case "table":
+            block = ConvertTable(e);
+            break;
+          // TODO <hr>?
+          default:
+            block = ConvertParagraph(e, TextFont, FontWeights.Normal, 1.0, true);
+            break;
+        }
+        if (block != null) {
+          return new List<Block>() { block };
+        }
+        else {
+          return new List<Block>();
+        }
+      }
+      else {
+        IEnumerable<Block> content;
+        if (e.Contents.Count > 0
+            && (e.Contents[0] is HTML.Cdata
+                || (e.Contents[0] as HTML.Element).IsInlineElement())) {
+          content = new List<Block>() { ConvertParagraph(e, TextFont, FontWeights.Normal, 1.0, true) };
+        }
+        else {
+          content = ConvertFlowsOrBlocks(e);
+        }
+        switch (e.Name) {
+          case "blockquote":
+            foreach (Block b in content) {
+              Thickness t = b.Margin;
+              double left = double.IsNaN(t.Left) ? 0 : t.Left;
+              double right = double.IsNaN(t.Right) ? 0 : t.Right;
+              b.Margin = new Thickness(left + 12, t.Top, right + 12, t.Bottom);
+              break;
+            }
+            break;
+            // TODO other kinds of flow container
+        }
+        return content;
       }
     }
 
@@ -114,7 +157,7 @@ namespace RssReader
             ColumnSpan = GetSpan(c, "colspan"),
             RowSpan = GetSpan(c, "rowspan"),
           };
-          tc.Blocks.AddRange(ConvertBlocks(c));
+          tc.Blocks.AddRange(ConvertFlowOrBlock(c));
           tr.Cells.Add(tc);
           columnNumber += tc.ColumnSpan;
         }
@@ -152,7 +195,7 @@ namespace RssReader
       List l = new List();
       foreach (HTML.Element ee in e.Contents) {
         ListItem li = new ListItem();
-        li.Blocks.AddRange(ConvertBlocks(ee));
+        li.Blocks.AddRange(ConvertFlowOrBlock(ee));
         l.ListItems.Add(li);
       }
       return l;
@@ -164,7 +207,7 @@ namespace RssReader
 
     private char LastCharacter;
 
-    private Paragraph ConvertParagraph(HTML.Element e, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace = true)
+    private Paragraph ConvertParagraph(HTML.Element e, FontFamily fontFamily, FontWeight fontWeight, double fontScale, bool collapseSpace)
     {
       LastCharacter = ' ';
       Paragraph p = new Paragraph();
