@@ -47,7 +47,7 @@ namespace RssReader
     {
       get
       {
-        return (Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute)).First() as AssemblyCopyrightAttribute).Copyright;
+        return Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright;
       }
 
     }
