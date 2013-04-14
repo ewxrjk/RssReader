@@ -40,6 +40,11 @@ namespace RssReader
     public ScrollViewer ParentScrollViewer = null;
 
     /// <summary>
+    /// Base URI for relative hyperlinks
+    /// </summary>
+    public Uri BaseUri = null;
+
+    /// <summary>
     /// Render an HTML document
     /// </summary>
     /// <param name="document"></param>
@@ -335,10 +340,19 @@ namespace RssReader
       if (e.Attributes.ContainsKey("href")) {
         Uri TargetURI;
         if (Uri.TryCreate(e.Attributes["href"], UriKind.RelativeOrAbsolute, out TargetURI)) {
+          if (!TargetURI.IsAbsoluteUri) {
+            TargetURI = BaseUri != null ? new Uri(BaseUri, TargetURI) : null;
+          }
+        }
+        if (TargetURI != null) {
           h.NavigateUri = TargetURI;
           h.RequestNavigate += RequestedNavigate;
+          h.ToolTip = TargetURI;
         }
-        h.ToolTip = e.Attributes["href"]; // tooltip contains URI even if it's bad
+        else {
+          // tooltip contains URI even if it's bad
+          h.ToolTip = e.Attributes["href"];
+        }
       }
       return h;
     }
