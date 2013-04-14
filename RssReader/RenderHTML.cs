@@ -323,6 +323,9 @@ namespace RssReader
             break;
         }
       }
+      if (sb != null && sb.Length > 0) {
+        span.Inlines.Add(new Run(sb.ToString()));
+      }
       return span;
     }
 
