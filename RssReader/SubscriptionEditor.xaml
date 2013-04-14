@@ -1,7 +1,11 @@
 ﻿<Window x:Class="RssReader.SubscriptionEditor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:RssReader"
         Title="Subscription Editor" Height="auto" Width="auto" ResizeMode="CanResize" SizeToContent="WidthAndHeight">
+  <Window.CommandBindings>
+    <CommandBinding Command="{x:Static local:SubscriptionEditor.CancelCommand}" Executed="CancelExecuted"/>
+  </Window.CommandBindings>
   <Grid Name="GridWidget">
     <Grid.RowDefinitions>
       <RowDefinition Height="auto"/>
@@ -16,6 +20,7 @@
     <TextBox Grid.Row="0" Grid.Column="1" Name="NewURI" MinWidth="384" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
     <Label Grid.Row="1" Grid.Column="1" Name="NewURIError" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="2" Foreground="Red" Content="{Binding LastError}"/>
     <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Name="ButtonContainer">
+      <Button Command="{x:Static local:SubscriptionEditor.CancelCommand}" Margin="2" Width="64">Cancel</Button>
       <Button Click="Reset" Margin="2" Width="64" Visibility="{Binding ResetVisibility}">Reset</Button>
       <Button Click="Check" Margin="2" Width="64" Visibility="{Binding CheckVisibility}" IsEnabled="{Binding Checkable}">Check</Button>
       <Button Click="OK" Margin="2" Width="64" IsDefault="True" IsEnabled="{Binding Acceptable}" Content="{Binding OKText}"></Button>

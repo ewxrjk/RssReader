@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Input;
 
 namespace RssReader
 {
@@ -25,6 +26,16 @@ namespace RssReader
       NewURI.TextChanged += NewURI_TextChanged;
     }
 
+    #region Commands
+
+    public static RoutedCommand CancelCommand = new RoutedCommand();
+
+    static SubscriptionEditor()
+    {
+      CancelCommand.InputGestures.Add(new KeyGesture(Key.Escape));
+    }
+
+    #endregion
 
     #region Public Fields And Properties
 
@@ -331,6 +342,14 @@ namespace RssReader
         this.Close();
         Accept = true;
       }
+    }
+
+    private void CancelExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+      if (_Subscription != null && _Subscription.Parent != null) {
+        Reset();
+      }
+      this.Close();
     }
 
     private void Check(object sender, RoutedEventArgs e)
