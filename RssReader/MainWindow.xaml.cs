@@ -265,6 +265,7 @@ namespace RssReader
       EntriesWidget.ItemsSource = selected != null ? ((SubscriptionViewModel)selected).Entries : null;
       EntriesScrollViewer.ScrollToHome();
       UpdateEntriesSortOrder();
+      UpdateEntriesFiltering();
     }
 
     private void SubscriptionViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -425,6 +426,70 @@ namespace RssReader
           dataView.SortDescriptions.Add(new SortDescription("Date", ListSortDirection.Descending));
         }
         dataView.SortDescriptions.Add(new SortDescription("Serial", ListSortDirection.Descending));
+      }
+    }
+
+    #endregion
+
+    #region Entry Filtering
+
+    public bool ShowAllEntries
+    {
+      get
+      {
+        return Properties.Settings.Default.ShowAllEntries;
+      }
+      set
+      {
+        if (value != Properties.Settings.Default.ShowAllEntries) {
+          Properties.Settings.Default.ShowAllEntries = value;
+          OnPropertyChanged();
+          OnPropertyChanged("ShowUnreadEntriesOnly");
+          UpdateEntriesFiltering();
+          Properties.Settings.Default.Save();
+        }
+      }
+    }
+
+    public bool ShowUnreadEntriesOnly
+    {
+      get
+      {
+        return !Properties.Settings.Default.ShowAllEntries;
+      }
+      set
+      {
+        ShowAllEntries = !value;
+      }
+    }
+
+    private void UpdateEntriesFiltering()
+    {
+      if (EntriesWidget != null
+         && EntriesWidget.ItemsSource != null) {
+        ICollectionView dataView = CollectionViewSource.GetDefaultView(EntriesWidget.ItemsSource);
+        if (Properties.Settings.Default.ShowAllEntries) {
+          dataView.Filter = ShowAllFilter;
+        }
+        else {
+          dataView.Filter = ShowUnreadEntriesOnlyFilter;
+        }
+      }
+    }
+
+    static private bool ShowAllFilter(object o)
+    {
+      return true;
+    }
+
+    static private bool ShowUnreadEntriesOnlyFilter(object o)
+    {
+      EntryViewModel evm = o as EntryViewModel;
+      if (evm != null) {
+        return evm.Unread;
+      }
+      else {
+        return false;
       }
     }
 

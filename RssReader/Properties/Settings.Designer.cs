@@ -82,5 +82,17 @@ namespace RssReader.Properties {
                 this["ShowAllSubscriptions"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowAllEntries {
+            get {
+                return ((bool)(this["ShowAllEntries"]));
+            }
+            set {
+                this["ShowAllEntries"] = value;
+            }
+        }
     }
 }
