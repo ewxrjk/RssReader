@@ -41,7 +41,8 @@ namespace RssReader
     {
       RenderHTML renderer = new RenderHTML()
       {
-        ParentScrollViewer = FindScrollViewer(Expander)
+        ParentScrollViewer = FindScrollViewer(Expander),
+        BaseUri = Model.URI,
       };
       FrameworkElement newContent = renderer.Render(Model.HtmlDescription);
       if (HasBody()) {
