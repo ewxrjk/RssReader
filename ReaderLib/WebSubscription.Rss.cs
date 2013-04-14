@@ -163,10 +163,12 @@ namespace ReaderLib
           unique = (string)link;
         }
       }
-      // Maybe there's an RDF about attribute
-      XAttribute about = item.Attribute(RDF + "about");
-      if (about != null) {
-        return about.Value;
+      if (unique == null) {
+        // Maybe there's an RDF about attribute
+        XAttribute about = item.Attribute(RDF + "about");
+        if (about != null) {
+          unique = about.Value;
+        }
       }
       // If we still don't have a unique ID use <description>
       // (one of <link> and <description> are required in RSS)
