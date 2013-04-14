@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Reflection;
+using System.Windows;
 
 namespace RssReader
 {
@@ -10,6 +12,7 @@ namespace RssReader
     public About()
     {
       InitializeComponent();
+      this.DataContext = this;
     }
 
     private void OK(object sender, RoutedEventArgs e)
@@ -30,6 +33,23 @@ namespace RssReader
         Owner = parent
       };
       about.ShowDialog();
+    }
+
+    public string Version
+    {
+      get
+      {
+        return Assembly.GetExecutingAssembly().GetName().Version.ToString();
+      }
+    }
+
+    public string Copyright
+    {
+      get
+      {
+        return (Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute)).First() as AssemblyCopyrightAttribute).Copyright;
+      }
+
     }
   }
 }
