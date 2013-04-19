@@ -379,7 +379,7 @@ namespace ReaderLib.HTML
       if(StackTopIs("tr")) {
         RequireTableCellContext();
       }
-      while (StackTopTypeIs(ElementType.Inline | ElementType.Block | ElementType.Table | ElementType.ListContainer)) {
+      while (StackTopTypeIs(ElementType.Inline | ElementType.TableContent | ElementType.Block | ElementType.Table | ElementType.ListContainer)) {
         Elements.Pop();
       }
       // If we are in a flow container that has already seen inline content then
@@ -397,7 +397,7 @@ namespace ReaderLib.HTML
     /// </summary>
     private void RequireInlineContext()
     {
-      if (!StackContainsTypes(ElementType.Block | ElementType.FlowContainer | ElementType.TableCell | ElementType.ListElement)) {
+      if (!StackContainsTypes(ElementType.Block | ElementType.TableContent | ElementType.FlowContainer | ElementType.TableCell | ElementType.ListElement)) {
         RequireBody();
         ProcessOpenTag("p", null);
       }
@@ -544,6 +544,7 @@ namespace ReaderLib.HTML
           RequireInlineContext();
           break;
         case ElementType.TableRow:
+        case ElementType.TableContent:
           RequireTableContext();
           break;
         case ElementType.TableCell:

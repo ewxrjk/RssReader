@@ -193,6 +193,8 @@ namespace Tests
     {
       HTML.Document d = HTML.Document.Parse("<table><tr><td>a</td><td>b</td><tr><td><p>c</td>");
       Assert.AreEqual("<html><head></head><body><table><tr><td>a</td><td>b</td></tr><tr><td><p>c</p></td></tr></table></body></html>", d.ToString());
+      d = HTML.Document.Parse("<table><tr><td>a<caption>c</table>");
+      Assert.AreEqual("<html><head></head><body><table><tr><td>a</td></tr><caption>c</caption></table></body></html>", d.ToString());
     }
 
     [TestMethod]

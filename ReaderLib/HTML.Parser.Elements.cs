@@ -25,6 +25,7 @@ namespace ReaderLib.HTML
       Body = 32768,
       Head = 65536,
       HTML = 131072,
+      TableContent = 262144,
     };
 
     internal static ElementType GetElementType(string name)
@@ -52,7 +53,7 @@ namespace ReaderLib.HTML
       { "body", ElementType.Body },
       { "br", ElementType.InlineSingle },
       { "button", ElementType.Inline },
-      { "caption", ElementType.Ignore },
+      { "caption", ElementType.TableContent },
       { "center", ElementType.Ignore },
       { "cite", ElementType.Inline },
       { "code", ElementType.Inline },
