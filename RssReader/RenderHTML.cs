@@ -218,7 +218,8 @@ namespace RssReader
                 ColumnSpan = GetSpan(c, "colspan"),
                 RowSpan = GetSpan(c, "rowspan"),
                 BorderBrush = Brushes.Black,
-                BorderThickness = new Thickness(1),
+                BorderThickness = new Thickness(0.5, 0.5, 0.5, 0.5),
+                Padding = new Thickness(1),
               };
               if (c.Name == "th") {
                 tc.Blocks.AddRange(ConvertFlowOrBlock(c, new Context(ctx) { fontWeight = FontWeights.Bold }));
