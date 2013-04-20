@@ -112,7 +112,7 @@ namespace RssReader
       if (e.IsBlockElement()
           || e.IsListElement()
           || e.IsTableElement() ) {
-        Block block;
+        Block block = null;
         switch (e.Name) {
           case "ul":
             block = ConvertList(e, ctx);
@@ -122,6 +122,8 @@ namespace RssReader
             l.StartIndex = 1;
             block = l;
             break;
+          case "dl":
+            return ConvertDefinitionList(e, ctx);
           case "h1":
           case "h2":
           case "h3":
@@ -167,10 +169,7 @@ namespace RssReader
         switch (e.Name) {
           case "blockquote":
             foreach (Block b in content) {
-              Thickness t = b.Margin;
-              double left = double.IsNaN(t.Left) ? 0 : t.Left;
-              double right = double.IsNaN(t.Right) ? 0 : t.Right;
-              b.Margin = new Thickness(left + 12, t.Top, right + 12, t.Bottom);
+              Indent(b, 12, 12);
               break;
             }
             break;
@@ -178,6 +177,14 @@ namespace RssReader
         }
         return content;
       }
+    }
+
+    private void Indent(Block b, double leftIndent, double rightIndent)
+    {
+      Thickness t = b.Margin;
+      double left = double.IsNaN(t.Left) ? 0 : t.Left;
+      double right = double.IsNaN(t.Right) ? 0 : t.Right;
+      b.Margin = new Thickness(left + leftIndent, t.Top, right + rightIndent, t.Bottom);
     }
 
     private Block HorizontalRule()
@@ -290,6 +297,21 @@ namespace RssReader
         l.ListItems.Add(li);
       }
       return l;
+    }
+
+    private IEnumerable<Block> ConvertDefinitionList(HTML.Element e, Context ctx)
+    {
+      List<Block> blocks = new List<Block>();
+      foreach (HTML.Element d in e.Contents) {
+        IEnumerable<Block> dblocks = ConvertFlowOrBlock(d, ctx);
+        if (d.Name == "dd") {
+          foreach (Block b in dblocks) {
+            Indent(b, 12, 0);
+          }
+        }
+        blocks.AddRange(dblocks);
+      }
+      return blocks;
     }
 
     #endregion
