@@ -57,6 +57,7 @@ namespace RssReader
         fontFamily = parent.TextFont;
         fontSize = parent.TextSize;
         fontWeight = FontWeights.Normal;
+        fontStyle = FontStyles.Normal;
       }
 
       public Context(Context parent)
@@ -64,11 +65,13 @@ namespace RssReader
         this.fontFamily = parent.fontFamily;
         this.fontSize = parent.fontSize;
         this.fontWeight = parent.fontWeight;
+        this.fontStyle = parent.fontStyle;
       }
 
       public FontFamily fontFamily;
       public double fontSize;
       public FontWeight fontWeight;
+      public FontStyle fontStyle;
     }
 
     /// <summary>
@@ -248,7 +251,9 @@ namespace RssReader
           ColumnSpan = columns,
           TextAlignment = TextAlignment.Center,
         };
-        Paragraph p = ConvertParagraph(caption, ctx, true);
+        Paragraph p = ConvertParagraph(caption,
+                                       new Context(ctx) { fontStyle = FontStyles.Italic },
+                                       true);
         tc.Blocks.Add(p);
         tr.Cells.Add(tc);
         trg.Rows.Add(tr);
@@ -325,6 +330,7 @@ namespace RssReader
           i.FontSize = ctx.fontSize;
           i.FontFamily = ctx.fontFamily;
           i.FontWeight = ctx.fontWeight;
+          i.FontStyle = ctx.fontStyle;
         }
         return i;
       }
@@ -341,7 +347,8 @@ namespace RssReader
           break;
         case "i":
         case "em":
-          s = new Italic();
+          s = new Span();
+          ctx = new Context(ctx) { fontStyle = FontStyles.Italic };
           break;
         case "u":
           s = new Underline();
