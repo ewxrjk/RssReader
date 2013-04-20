@@ -379,7 +379,7 @@ namespace ReaderLib.HTML
       if(StackTopIs("tr")) {
         RequireTableCellContext();
       }
-      while (StackTopTypeIs(ElementType.Inline | ElementType.TableContent | ElementType.Block | ElementType.Table | ElementType.ListContainer)) {
+      while (StackTopTypeIs(ElementType.Inline | ElementType.TableContent | ElementType.Block | ElementType.Table | ElementType.ListContainer | ElementType.DefinitionList)) {
         Elements.Pop();
       }
       // If we are in a flow container that has already seen inline content then
@@ -397,7 +397,7 @@ namespace ReaderLib.HTML
     /// </summary>
     private void RequireInlineContext()
     {
-      if (!StackContainsTypes(ElementType.Block | ElementType.TableContent | ElementType.FlowContainer | ElementType.TableCell | ElementType.ListElement)) {
+      if (!StackContainsTypes(ElementType.Block | ElementType.TableContent | ElementType.FlowContainer | ElementType.TableCell | ElementType.ListElement | ElementType.Definition)) {
         RequireBody();
         ProcessOpenTag("p", null);
       }
@@ -476,6 +476,17 @@ namespace ReaderLib.HTML
       }
     }
 
+    private void RequireDefinitionContext()
+    {
+      RequireBody();
+      if (!StackContainsTypes(ElementType.DefinitionList)) {
+        ProcessOpenTag("dl", null);
+      }
+      while (StackTopIsNot("dl")) {
+        ProcessCloseTag(StackTop().Name);
+      }
+    }
+
     /// <summary>
     /// Process string content
     /// </summary>
@@ -486,7 +497,7 @@ namespace ReaderLib.HTML
         if(Elements.Count == 0) {
           return;
         }
-        if(!StackTopTypeIs(ElementType.Block | ElementType.Inline)) {
+        if(!StackTopTypeIs(ElementType.Block | ElementType.Inline | ElementType.Definition)) {
           return;
         }
       }
@@ -537,6 +548,7 @@ namespace ReaderLib.HTML
         case ElementType.Block:
         case ElementType.BlockSingle:
         case ElementType.FlowContainer:
+        case ElementType.DefinitionList:
           RequireBlockContext();
           break;
         case ElementType.Inline:
@@ -554,6 +566,9 @@ namespace ReaderLib.HTML
         case ElementType.HeadSingle:
         case ElementType.HeadSpecial:
           RequireHead();
+          break;
+        case ElementType.Definition:
+          RequireDefinitionContext();
           break;
       }
       Element newElement = new Element()

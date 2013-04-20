@@ -272,5 +272,14 @@ namespace Tests
       Assert.AreEqual("<html><head></head><body><blockquote><pre>A</pre><p>B</p></blockquote></body></html>", d.ToString());
     }
 
+    [TestMethod]
+    public void TestHTMLDefinitionList()
+    {
+      HTML.Document d = HTML.Document.Parse("<dl><dd>a<dt>b</dl>");
+      Assert.AreEqual("<html><head></head><body><dl><dd>a</dd><dt>b</dt></dl></body></html>", d.ToString());
+      d = HTML.Document.Parse("<dl><dd>a<dt><p>b</dl>");
+      Assert.AreEqual("<html><head></head><body><dl><dd>a</dd><dt><p>b</p></dt></dl></body></html>", d.ToString());
+    }
+
   }
 }

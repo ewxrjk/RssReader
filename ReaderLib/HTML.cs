@@ -57,7 +57,7 @@ namespace ReaderLib.HTML
 
     public bool IsListElement()
     {
-      return (HTML.Parser.GetElementType(Name) & (Parser.ElementType.ListContainer)) != 0;
+      return (HTML.Parser.GetElementType(Name) & (Parser.ElementType.ListContainer | Parser.ElementType.DefinitionList)) != 0;
     }
 
     public bool IsTableElement()
@@ -72,7 +72,7 @@ namespace ReaderLib.HTML
 
     public bool IsFlowContainer()
     {
-      return (HTML.Parser.GetElementType(Name) & (Parser.ElementType.FlowContainer)) != 0;
+      return (HTML.Parser.GetElementType(Name) & (Parser.ElementType.FlowContainer | Parser.ElementType.Definition)) != 0;
     }
 
     /// <summary>
