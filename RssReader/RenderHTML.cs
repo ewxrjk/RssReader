@@ -195,35 +195,63 @@ namespace RssReader
 
     private Table ConvertTable(HTML.Element e, Context ctx)
     {
-      Table t = new Table();
+      Table t = new Table()
+      {
+        CellSpacing = 0,
+      };
       TableRowGroup trg = new TableRowGroup();
       t.RowGroups.Add(trg);
       int columns = 0;
+      HTML.Element caption = null;
       foreach(HTML.Element r in e.Contents) {
-        TableRow tr = new TableRow();
-        trg.Rows.Add(tr);
-        int columnNumber = 0;
-        foreach(HTML.Element c in r.Contents) {
-          TableCell tc = new TableCell()
-          {
-            ColumnSpan = GetSpan(c, "colspan"),
-            RowSpan = GetSpan(c, "rowspan"),
-          };
-          if (c.Name == "th") {
-            tc.Blocks.AddRange(ConvertFlowOrBlock(c, new Context(ctx) { fontWeight = FontWeights.Bold }));
-          }
-          else {
-            tc.Blocks.AddRange(ConvertFlowOrBlock(c, ctx));
-          }
-          tr.Cells.Add(tc);
-          columnNumber += tc.ColumnSpan;
+        switch (r.Name) {
+          case "tr":
+            TableRow tr = new TableRow();
+            trg.Rows.Add(tr);
+            int columnNumber = 0;
+            foreach (HTML.Element c in r.Contents) {
+              TableCell tc = new TableCell()
+              {
+                ColumnSpan = GetSpan(c, "colspan"),
+                RowSpan = GetSpan(c, "rowspan"),
+                BorderBrush = Brushes.Black,
+                BorderThickness = new Thickness(1),
+              };
+              if (c.Name == "th") {
+                tc.Blocks.AddRange(ConvertFlowOrBlock(c, new Context(ctx) { fontWeight = FontWeights.Bold }));
+              }
+              else {
+                tc.Blocks.AddRange(ConvertFlowOrBlock(c, ctx));
+              }
+              tr.Cells.Add(tc);
+              columnNumber += tc.ColumnSpan;
+            }
+            if (columnNumber > columns) {
+              columns = columnNumber;
+            }
+            break;
+          case "caption":
+            caption = r;
+            break;
         }
-        if (columnNumber > columns) {
-          columns = columnNumber;
-        }
+      }
+      if (caption != null && columns == 0) {
+        columns = 1;
       }
       for (int i = 0; i < columns; ++i) {
         t.Columns.Add(new TableColumn());
+      }
+      if (caption != null) {
+        TableRow tr = new TableRow();
+        TableCell tc = new TableCell()
+        {
+          ColumnSpan = columns,
+          TextAlignment = TextAlignment.Center,
+        };
+        Paragraph p = ConvertParagraph(caption, ctx, true);
+        tc.Blocks.Add(p);
+        tr.Cells.Add(tc);
+        trg.Rows.Add(tr);
       }
       return t;
     }
