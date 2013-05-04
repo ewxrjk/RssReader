@@ -470,10 +470,10 @@ namespace RssReader
       return span;
     }
 
-    private Hyperlink RenderHyperlink(HTML.Element e)
+    private Span RenderHyperlink(HTML.Element e)
     {
-      Hyperlink h = new Hyperlink();
       if (e.Attributes.ContainsKey("href")) {
+        Hyperlink h = new Hyperlink();
         Uri TargetURI;
         if (Uri.TryCreate(e.Attributes["href"], UriKind.RelativeOrAbsolute, out TargetURI)) {
           if (!TargetURI.IsAbsoluteUri) {
@@ -489,8 +489,11 @@ namespace RssReader
           // tooltip contains URI even if it's bad
           h.ToolTip = e.Attributes["href"];
         }
+        return h;
       }
-      return h;
+      else {
+        return new Span();
+      }
     }
 
     static private void RequestedNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
