@@ -233,7 +233,9 @@ namespace ReaderLib.HTML
                 ctx = Context.TAG_attrvalue;
                 break;
               case Context.TAG_attrvalue:
-                attributes.Add(attributeName, value.ToString());
+                if (!attributes.ContainsKey(attributeName)) {
+                  attributes.Add(attributeName, value.ToString());
+                }
                 ctx = Context.TAG_attrname;
                 break;
             }
