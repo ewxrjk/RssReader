@@ -3,6 +3,9 @@ HalfMoon RSS Reader
 
 This is a simple RSS reader for Windows.
 
+It is basically abandonware.  Still, if you think you can get some use
+out of it, go for it.
+
 Requirements
 ------------
 
