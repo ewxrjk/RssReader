@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.u
-sing System.Collections.Generic;
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
