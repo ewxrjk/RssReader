@@ -7,5 +7,13 @@ Menu bar:
 
 Use async instead of a background thread?
 More keyboard shortcuts?
+        Up/Down/PgUp/PgDn in article view only work inconsistently!?!
+        Home/end don't work at all?
 Missing HTML support?
+        title= on arbitrary elements
+        <object>
+        <q>
+        <ins>, <del> - tricky, they are WEIRD
+        <col>, <colgroup>
+        <base>
 Honor type attributes in atom properly
